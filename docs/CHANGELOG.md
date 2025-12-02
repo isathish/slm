@@ -1,3 +1,9 @@
+---
+layout: default
+title: Changelog
+nav_order: 9
+---
+
 # Changelog
 
 All notable changes to the SLM Builder project will be documented in this file.

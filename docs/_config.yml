@@ -2,61 +2,58 @@
 
 # Site settings
 title: SLM Builder Documentation
-description: >-
-  Build Small/Specialized Language Models from any dataset, source, or topic. Complete documentation for the SLM Builder toolkit.
-
+description: Build Small/Specialized Language Models from any dataset, source, or topic
 baseurl: "/slm"
 url: "https://isathish.github.io"
 
-# Theme
-theme: jekyll-theme-cayman
-# Alternative themes: minima, jekyll-theme-slate, jekyll-theme-modernist
+# Theme - Using just-the-docs for better multi-page navigation
+remote_theme: just-the-docs/just-the-docs
+color_scheme: light
+
+# Aux links for header
+aux_links:
+  "GitHub":
+    - "https://github.com/isathish/slm"
+
+# Footer
+footer_content: "Copyright &copy; 2025 SLM Builder. MIT License."
+
+# Search
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+
+# Navigation
+nav_enabled: true
+heading_anchors: true
 
 # Build settings
 markdown: kramdown
 kramdown:
   input: GFM
   syntax_highlighter: rouge
-
-# Collections
-collections:
-  docs:
-    output: true
-    permalink: /:collection/:name
-
-# Defaults
-defaults:
-- scope:
-    path: ""
-    type: "docs"
-  values:
-    layout: "default"
+  syntax_highlighter_opts:
+    block:
+      line_numbers: true
 
 # Plugins
 plugins:
-- jekyll-feed
-- jekyll-seo-tag
-- jekyll-sitemap
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-remote-theme
 
-# Exclude from processing
+# Exclude
 exclude:
-- Gemfile
-- Gemfile.lock
-- node_modules
-- vendor
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
 
-# Include files
-include:
-- _pages
-
-# Navigation
-nav_order:
-- README.md
-- INSTALLATION.md
-- QUICK_REFERENCE.md
-- FEATURES.md
-- ADDITIONAL_FEATURES.md
-- EXAMPLES.md
-- CONTRIBUTING.md
-- CHANGELOG.md
-- RELEASE_GUIDE.md
+# Defaults for front matter
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

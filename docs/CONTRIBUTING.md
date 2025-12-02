@@ -1,3 +1,9 @@
+---
+layout: default
+title: Contributing
+nav_order: 8
+---
+
 # Contributing to SLM-Builder
 
 Thank you for your interest in contributing to SLM-Builder! This document provides guidelines for contributing to the project.

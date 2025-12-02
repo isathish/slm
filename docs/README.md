@@ -1,3 +1,9 @@
+---
+layout: default
+title: Overview
+nav_order: 2
+---
+
 # SLM-Builder
 
 **Build Small/Specialized Language Models from any dataset, source, or topic.**

@@ -1,3 +1,9 @@
+---
+layout: default
+title: Quick Reference
+nav_order: 4
+---
+
 # 🚀 Quick Reference - Documentation & Releases
 
 ## 📚 Documentation Location

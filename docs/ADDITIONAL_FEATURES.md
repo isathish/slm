@@ -1,3 +1,9 @@
+---
+layout: default
+title: Additional Features
+nav_order: 6
+---
+
 # Additional Features Documentation
 
 This document covers the advanced features added to the SLM Builder package, including dataset splitting, database loaders, API loaders, and model comparison.

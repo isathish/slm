@@ -63,25 +63,121 @@ jobs:
           echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
       
-      - name: Generate release notes
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 ${{ steps.version.outputs.tag }}^ 2>/dev/null || echo "")
+          echo "prev_tag=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Previous tag: $PREV_TAG"
+      
+      - name: Generate comprehensive release notes
         id: release_notes
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           RELEASE_TYPE="${{ steps.version.outputs.release_type }}"
+          PREV_TAG="${{ steps.prev_tag.outputs.prev_tag }}"
+          CURRENT_TAG="${{ steps.version.outputs.tag }}"
           
-          # Create release notes
+          # Get commits since last tag
+          if [ -n "$PREV_TAG" ]; then
+            COMMITS=$(git log ${PREV_TAG}..HEAD --pretty=format:"- %s (%h)" --no-merges)
+            COMMIT_COUNT=$(git rev-list ${PREV_TAG}..HEAD --count --no-merges)
+          else
+            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges | head -20)
+            COMMIT_COUNT=$(git rev-list HEAD --count --no-merges)
+          fi
+          
+          # Categorize commits
+          FEATURES=$(echo "$COMMITS" | grep -iE "feat:|feature:|✨|add " || echo "")
+          FIXES=$(echo "$COMMITS" | grep -iE "fix:|bugfix:|🐛|resolve " || echo "")
+          DOCS=$(echo "$COMMITS" | grep -iE "docs:|documentation:|📚|update.*doc" || echo "")
+          PERF=$(echo "$COMMITS" | grep -iE "perf:|performance:|⚡|optimize" || echo "")
+          REFACTOR=$(echo "$COMMITS" | grep -iE "refactor:|♻️|restructure" || echo "")
+          TESTS=$(echo "$COMMITS" | grep -iE "test:|🧪|add.*test" || echo "")
+          CHORES=$(echo "$COMMITS" | grep -iE "chore:|🔧|update.*deps" || echo "")
+          
+          # Create comprehensive release notes
           cat > release_notes.md << EOF
-          # SLM Builder v$VERSION
-          
-          ## Release Type: ${RELEASE_TYPE^^}
+          ## 🎉 SLM Builder v$VERSION
           
           $(if [ "$RELEASE_TYPE" == "major" ]; then
+            echo "### 🚨 Major Release"
             echo "This is a major release with significant new features and potential breaking changes."
           elif [ "$RELEASE_TYPE" == "minor" ]; then
-            echo "This is a minor release with new features and improvements."
+            echo "### ✨ Minor Release"
+            echo "This release adds new features and improvements while maintaining backward compatibility."
           else
-            echo "This is a patch release with bug fixes and minor improvements."
+            echo "### 🐛 Patch Release"
+            echo "This release includes bug fixes and minor improvements."
           fi)
+          
+          ### 📊 Release Statistics
+          - **Commits**: $COMMIT_COUNT$([ -n "$PREV_TAG" ] && echo " since $PREV_TAG" || echo " total")
+          - **Release Type**: ${RELEASE_TYPE}
+          - **Date**: $(date +"%B %d, %Y")
+          
+          EOF
+          
+          # Add categorized changes
+          if [ ! -z "$FEATURES" ]; then
+            cat >> release_notes.md << EOF
+          ### ✨ New Features
+          $FEATURES
+          
+          EOF
+          fi
+          
+          if [ ! -z "$FIXES" ]; then
+            cat >> release_notes.md << EOF
+          ### 🐛 Bug Fixes
+          $FIXES
+          
+          EOF
+          fi
+          
+          if [ ! -z "$PERF" ]; then
+            cat >> release_notes.md << EOF
+          ### ⚡ Performance Improvements
+          $PERF
+          
+          EOF
+          fi
+          
+          if [ ! -z "$DOCS" ]; then
+            cat >> release_notes.md << EOF
+          ### 📚 Documentation
+          $DOCS
+          
+          EOF
+          fi
+          
+          if [ ! -z "$REFACTOR" ]; then
+            cat >> release_notes.md << EOF
+          ### ♻️ Code Refactoring
+          $REFACTOR
+          
+          EOF
+          fi
+          
+          if [ ! -z "$TESTS" ]; then
+            cat >> release_notes.md << EOF
+          ### 🧪 Tests
+          $TESTS
+          
+          EOF
+          fi
+          
+          if [ ! -z "$CHORES" ]; then
+            cat >> release_notes.md << EOF
+          ### 🔧 Maintenance
+          $CHORES
+          
+          EOF
+          fi
+          
+          # Add installation and documentation
+          cat >> release_notes.md << EOF
+          ---
           
           ## 📦 Installation
           
@@ -89,48 +185,78 @@ jobs:
           pip install slm-builder==$VERSION
           \`\`\`
           
-          ## 🎯 What's Included
+          Or upgrade from a previous version:
           
-          ### Core Features
-          - 📥 Multiple data source support (CSV, JSONL, SQL, MongoDB, APIs)
-          - 🎯 Task-specific training (QA, classification, generation, instruction-tuning)
-          - 🚀 Easy training with pre-configured recipes (LoRA, full fine-tuning)
-          - 💻 CPU & GPU support with hardware auto-detection
-          - 📦 Multiple export formats (ONNX, TorchScript, HuggingFace)
+          \`\`\`bash
+          pip install --upgrade slm-builder
+          \`\`\`
           
-          ### Advanced Features
-          - 🔀 Dynamic model loading from HuggingFace Hub, local paths, Ollama, GGUF files
-          - ⚖️ Smart dataset splitting with stratification and K-fold cross-validation
-          - 🗄️ Database integration (PostgreSQL, MySQL, SQLite, MongoDB)
-          - 🌐 REST API data loading with authentication and pagination
-          - 📊 Model comparison and benchmarking
-          - 📈 Experiment tracking
-          - 🔬 Advanced evaluation metrics (Perplexity, BLEU, ROUGE, Accuracy, F1)
-          - ⚡ Quantization support (4-bit, 8-bit)
+          ## 🎯 Key Features
+          
+          - 📥 **14 Data Sources**: CSV, JSONL, SQL, MongoDB, REST APIs, and more
+          - 🎯 **Multiple Tasks**: QA, classification, generation, instruction-tuning
+          - 🚀 **Easy Training**: Pre-configured recipes (LoRA, full fine-tuning)
+          - 💻 **CPU & GPU**: Optimized for both environments
+          - 📊 **Model Comparison**: Benchmark multiple models
+          - 🔬 **Advanced Metrics**: Perplexity, BLEU, ROUGE, Accuracy, F1
+          - ⚡ **Quantization**: 4-bit and 8-bit model compression
+          - 📦 **Multiple Exports**: ONNX, TorchScript, HuggingFace
           
           ## 📚 Documentation
           
-          - [Main Documentation](https://github.com/${{ github.repository }}/blob/main/README.md)
-          - [Features Guide](https://github.com/${{ github.repository }}/wiki/Features)
-          - [Examples](https://github.com/${{ github.repository }}/wiki/Examples)
-          - [Contributing](https://github.com/${{ github.repository }}/wiki/Contributing)
+          - 📖 [Documentation Site](https://isathish.github.io/slm/)
+          - 🚀 [Quick Start Guide](https://github.com/${{ github.repository }}/blob/main/docs/QUICK_REFERENCE.md)
+          - 📝 [Installation Guide](https://github.com/${{ github.repository }}/blob/main/docs/INSTALLATION.md)
+          - ✨ [Features](https://github.com/${{ github.repository }}/blob/main/docs/FEATURES.md)
+          - 💡 [Examples](https://github.com/${{ github.repository }}/tree/main/examples)
+          - 🤝 [Contributing](https://github.com/${{ github.repository }}/blob/main/docs/CONTRIBUTING.md)
           
-          ## 🔗 Links
+          ## 🔗 Quick Links
           
           - [GitHub Repository](https://github.com/${{ github.repository }})
-          - [Documentation Wiki](https://github.com/${{ github.repository }}/wiki)
-          - [Examples Directory](https://github.com/${{ github.repository }}/tree/main/examples)
+          - [Issue Tracker](https://github.com/${{ github.repository }}/issues)
+          - [Discussions](https://github.com/${{ github.repository }}/discussions)
           
-          ## 📝 Changelog
-          
-          For detailed changes, see the [commit history](https://github.com/${{ github.repository }}/commits/v$VERSION).
-          
-          ---
-          
-          **Full Changelog**: https://github.com/${{ github.repository }}/compare/...v$VERSION
+          $(if [ -n "$PREV_TAG" ]; then
+            echo "## 📝 Full Changelog"
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURRENT_TAG}"
+          else
+            echo "## 📝 Changelog"
+            echo ""
+            echo "This is the first release. See [commit history](https://github.com/${{ github.repository }}/commits/${CURRENT_TAG}) for details."
+          fi)
           EOF
           
-          echo "Release notes generated"
+          echo "✅ Comprehensive release notes generated"
+          cat release_notes.md
+      
+      - name: Update CHANGELOG.md
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_DATE=$(date +"%Y-%m-%d")
+          
+          # Create changelog entry from release notes
+          {
+            echo "# Changelog"
+            echo ""
+            echo "## [v$VERSION] - $RELEASE_DATE"
+            echo ""
+            cat release_notes.md | grep -A 1000 "^###" | grep -B 1000 "^---" | head -n -1
+            echo ""
+            if [ -f docs/CHANGELOG.md ]; then
+              tail -n +2 docs/CHANGELOG.md
+            fi
+          } > docs/CHANGELOG.md.new
+          
+          mv docs/CHANGELOG.md.new docs/CHANGELOG.md
+          
+          # Commit changelog update
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/CHANGELOG.md
+          git commit -m "📝 Update CHANGELOG for v$VERSION" || echo "No changes to commit"
+          git push origin main || echo "Nothing to push"
       
       - name: Create Git tag (if workflow_dispatch)
         if: github.event_name == 'workflow_dispatch'
@@ -140,11 +266,26 @@ jobs:
           git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.version }}"
           git push origin "${{ steps.version.outputs.tag }}"
       
+      - name: Check if release exists
+        id: check_release
+        run: |
+          if gh release view ${{ steps.version.outputs.tag }} &>/dev/null; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release ${{ steps.version.outputs.tag }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release ${{ steps.version.outputs.tag }} does not exist"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+      
       - name: Create GitHub Release
+        if: steps.check_release.outputs.exists != 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "Release ${{ steps.version.outputs.version }}"
+          name: Release v${{ steps.version.outputs.version }}
           body_path: release_notes.md
           draft: false
           prerelease: false
@@ -222,6 +363,7 @@ jobs:
           python setup.py sdist bdist_wheel
       
       - name: Upload Release Assets
+        if: steps.check_release.outputs.exists != 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.version.outputs.tag }}

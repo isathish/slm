@@ -1,3 +1,10 @@
+---
+layout: default
+title: Core Features
+nav_order: 5
+has_children: false
+---
+
 # SLM-Builder: New Features & Enhancements
 
 ## 🎯 Overview

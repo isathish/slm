@@ -1,3 +1,9 @@
+---
+layout: default
+title: Examples
+nav_order: 7
+---
+
 # SLM Builder Examples
 
 This directory contains comprehensive examples demonstrating all features of the SLM Builder package.
