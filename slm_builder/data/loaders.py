@@ -2,10 +2,8 @@
 
 import csv
 import hashlib
-import uuid
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-from urllib.parse import urlparse
+from typing import Any, Dict, List, Optional
 
 import requests
 from tqdm import tqdm
@@ -464,7 +462,7 @@ def get_loader(source: str, task: str = "qa", **kwargs) -> DataLoader:
                     first_line = f.readline()
                     if first_line.strip().startswith("{"):
                         return JSONLLoader(task=task)
-            except:
+            except Exception:
                 pass
 
         raise ValueError(f"Could not determine loader for source: {source}")

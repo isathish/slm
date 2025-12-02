@@ -1,6 +1,6 @@
 """PEFT/LoRA utilities."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from slm_builder.config import LoRAConfig
 from slm_builder.utils import get_logger

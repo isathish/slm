@@ -1,6 +1,5 @@
 """Main SLM Builder API."""
 
-import os
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
@@ -14,17 +13,11 @@ from slm_builder.models.trainer import Trainer, prepare_dataset_for_training
 from slm_builder.utils import (
     compute_data_hash,
     detect_hardware,
-    get_device_string,
     get_logger,
-    recommend_base_models,
-    recommend_batch_size,
-    recommend_recipe,
-    save_json,
     save_jsonl,
     save_metadata,
     scan_dataset_for_pii,
     setup_logging,
-    validate_directory_exists,
 )
 
 logger = get_logger(__name__)

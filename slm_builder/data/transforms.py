@@ -2,7 +2,7 @@
 
 import re
 import unicodedata
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from slm_builder.config import PreprocessConfig
 from slm_builder.utils import get_logger

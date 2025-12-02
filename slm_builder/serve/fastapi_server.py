@@ -1,6 +1,6 @@
 """FastAPI server for serving SLM models."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field

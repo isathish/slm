@@ -7,7 +7,6 @@ from typing import Optional
 import click
 
 from slm_builder import SLMBuilder
-from slm_builder.config import SLMConfig
 from slm_builder.data.annotator import annotate_dataset
 from slm_builder.utils import load_jsonl, load_yaml, setup_logging
 
@@ -111,7 +110,7 @@ def build(
 @click.option("--port", default=8501, help="Streamlit server port")
 def annotate(source: str, task: str, output_path: str, port: int):
     """Launch annotation UI for labeling data."""
-    click.echo(f"🏷️  Launching annotation UI")
+    click.echo("🏷️  Launching annotation UI")
     click.echo(f"   Source: {source}")
     click.echo(f"   Task: {task}")
     click.echo(f"   Output: {output_path}")
@@ -142,7 +141,7 @@ def annotate(source: str, task: str, output_path: str, port: int):
 @click.option("--quantize", is_flag=True, help="Quantize the model")
 def export(model_dir: str, format: str, optimize: str, output_dir: Optional[str], quantize: bool):
     """Export a trained model to ONNX or other formats."""
-    click.echo(f"📦 Exporting model")
+    click.echo("📦 Exporting model")
     click.echo(f"   Model: {model_dir}")
     click.echo(f"   Format: {format}")
     click.echo(f"   Optimize for: {optimize}")
@@ -162,7 +161,7 @@ def export(model_dir: str, format: str, optimize: str, output_dir: Optional[str]
             quantize=quantize,
         )
 
-        click.echo(f"\n✅ Export complete!")
+        click.echo("\n✅ Export complete!")
         click.echo(f"   Exported to: {exported_path}")
 
     except Exception as e:
@@ -176,7 +175,7 @@ def export(model_dir: str, format: str, optimize: str, output_dir: Optional[str]
 @click.option("--port", default=8080, help="Server port")
 def serve(model_dir: str, host: str, port: int):
     """Start a FastAPI server to serve the model."""
-    click.echo(f"🚀 Starting server")
+    click.echo("🚀 Starting server")
     click.echo(f"   Model: {model_dir}")
     click.echo(f"   Host: {host}")
     click.echo(f"   Port: {port}")
@@ -206,7 +205,7 @@ def info(source: str):
         # Dataset info
         if source.endswith(".jsonl") or source.endswith(".json"):
             records = load_jsonl(source)
-            click.echo(f"   Type: JSONL Dataset")
+            click.echo("   Type: JSONL Dataset")
             click.echo(f"   Records: {len(records)}")
             if records:
                 click.echo(f"   Sample keys: {list(records[0].keys())}")
@@ -218,14 +217,14 @@ def info(source: str):
     elif source_path.is_dir():
         # Check if it's a model directory
         if (source_path / "config.json").exists():
-            click.echo(f"   Type: HuggingFace Model")
+            click.echo("   Type: HuggingFace Model")
             if (source_path / "pytorch_model.bin").exists():
                 size = (source_path / "pytorch_model.bin").stat().st_size / (1024**2)
                 click.echo(f"   Model size: {size:.2f} MB")
         else:
             # Directory of files
             files = list(source_path.glob("*"))
-            click.echo(f"   Type: Directory")
+            click.echo("   Type: Directory")
             click.echo(f"   Files: {len(files)}")
 
 

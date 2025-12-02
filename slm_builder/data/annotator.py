@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from slm_builder.utils import get_logger, load_jsonl, save_jsonl
+from slm_builder.utils import get_logger, save_jsonl
 
 logger = get_logger(__name__)
 
@@ -116,7 +116,9 @@ current_idx = st.session_state.current_idx
 
 # Header
 st.title("🏷️ SLM Builder Annotator")
-st.markdown(f"**Task:** {{TASK}} | **Progress:** {{sum(st.session_state.annotated)}}/{{len(records)}}")
+annotated = sum(st.session_state.annotated)
+progress_text = f"**Task:** {{TASK}} | **Progress:** {{annotated}}/{{len(records)}}"
+st.markdown(progress_text)
 
 # Navigation
 col1, col2, col3 = st.columns([1, 2, 1])
@@ -136,40 +138,52 @@ st.divider()
 # Current record
 if records:
     record = records[current_idx]
-    
+
     st.subheader(f"Record {{current_idx + 1}} / {{len(records)}}")
     st.markdown(f"**ID:** `{{record.get('id', 'N/A')}}`")
-    
+
     # Display text
-    st.text_area("Text", value=record.get("text", ""), height=150, disabled=True)
-    
+    st.text_area(
+        "Text", value=record.get("text", ""), height=150, disabled=True
+    )
+
     # Annotation fields based on task
     if TASK == "qa":
-        question = st.text_input("Question", value=record.get("label", {{}}).get("question", ""))
-        answer = st.text_area("Answer", value=record.get("label", {{}}).get("answer", ""), height=100)
-        
+        question_val = record.get("label", {{}}).get("question", "")
+        question = st.text_input("Question", value=question_val)
+        answer_val = record.get("label", {{}}).get("answer", "")
+        answer = st.text_area("Answer", value=answer_val, height=100)
+
         if st.button("💾 Save Annotation"):
             record["label"] = {{"question": question, "answer": answer}}
             st.session_state.annotated[current_idx] = True
             st.success("Saved!")
-    
+
     elif TASK == "classification":
-        label = st.text_input("Label/Category", value=record.get("label", {{}}).get("label", ""))
-        
+        label_val = record.get("label", {{}}).get("label", "")
+        label = st.text_input("Label/Category", value=label_val)
+
         if st.button("💾 Save Annotation"):
             record["label"] = {{"label": label}}
             st.session_state.annotated[current_idx] = True
             st.success("Saved!")
-    
+
     elif TASK == "instruction":
-        instruction = st.text_area("Instruction", value=record.get("label", {{}}).get("instruction", ""), height=80)
-        response = st.text_area("Response", value=record.get("label", {{}}).get("response", ""), height=100)
-        
+        instr_val = record.get("label", {{}}).get("instruction", "")
+        instruction = st.text_area(
+            "Instruction", value=instr_val, height=80
+        )
+        resp_val = record.get("label", {{}}).get("response", "")
+        response = st.text_area("Response", value=resp_val, height=100)
+
         if st.button("💾 Save Annotation"):
-            record["label"] = {{"instruction": instruction, "response": response}}
+            record["label"] = {
+                "instruction": instruction,
+                "response": response,
+            }
             st.session_state.annotated[current_idx] = True
             st.success("Saved!")
-    
+
     # Metadata
     with st.expander("Metadata"):
         st.json(record.get("metadata", {{}}))
@@ -177,19 +191,21 @@ if records:
 # Sidebar
 with st.sidebar:
     st.header("Actions")
-    
+
     if st.button("💾 Export All Annotations"):
         save_annotations(records)
-    
+
     st.markdown("---")
     st.header("Statistics")
     st.metric("Total Records", len(records))
     st.metric("Annotated", sum(st.session_state.annotated))
     st.metric("Remaining", len(records) - sum(st.session_state.annotated))
-    
+
     st.markdown("---")
     st.markdown("**Jump to Record**")
-    jump_to = st.number_input("Record #", min_value=1, max_value=len(records), value=current_idx + 1)
+    jump_to = st.number_input(
+        "Record #", min_value=1, max_value=len(records), value=current_idx + 1
+    )
     if st.button("Go"):
         st.session_state.current_idx = jump_to - 1
         st.rerun()

@@ -1,7 +1,7 @@
 """Model export utilities."""
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 from slm_builder.utils import get_logger
 
