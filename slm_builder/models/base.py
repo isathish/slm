@@ -61,9 +61,7 @@ class ModelFactory:
         if source == ModelSource.OLLAMA:
             return ModelFactory._load_from_ollama(resolved_path, device, **kwargs)
         elif source == ModelSource.GGUF_FILE:
-            return ModelFactory._load_from_gguf(
-                resolved_path, device, use_auth_token, **kwargs
-            )
+            return ModelFactory._load_from_gguf(resolved_path, device, use_auth_token, **kwargs)
         elif source in [ModelSource.HTTP_URL, ModelSource.S3_URL]:
             return ModelFactory._load_from_url(
                 resolved_path, device, use_auth_token, trust_remote_code, **kwargs
@@ -142,9 +140,7 @@ class ModelFactory:
                 model_kwargs["device_map"] = "auto"
                 logger.info("Using quantization", config=bnb_config)
             except Exception as e:
-                logger.warning(
-                    "Quantization failed, falling back to normal loading", error=str(e)
-                )
+                logger.warning("Quantization failed, falling back to normal loading", error=str(e))
 
         model = AutoModelForCausalLM.from_pretrained(model_path, **model_kwargs)
 
@@ -177,9 +173,7 @@ class ModelFactory:
             )
 
             if model_name not in result.stdout:
-                logger.warning(
-                    "Model not found in Ollama, attempting to pull", model=model_name
-                )
+                logger.warning("Model not found in Ollama, attempting to pull", model=model_name)
                 subprocess.run(["ollama", "pull", model_name], check=True, timeout=300)
 
             # Create a wrapper for Ollama
@@ -244,8 +238,7 @@ class ModelFactory:
 
         except ImportError:
             raise ImportError(
-                "llama-cpp-python not installed. Install with: "
-                "pip install llama-cpp-python"
+                "llama-cpp-python not installed. Install with: " "pip install llama-cpp-python"
             )
         except Exception as e:
             logger.error("Failed to load GGUF model", error=str(e))

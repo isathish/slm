@@ -396,17 +396,13 @@ class ExperimentTracker:
             return None
 
         # Filter experiments that have the metric
-        valid_experiments = [
-            exp for exp in experiments if metric in exp.get("metrics", {})
-        ]
+        valid_experiments = [exp for exp in experiments if metric in exp.get("metrics", {})]
 
         if not valid_experiments:
             return None
 
         # Sort by metric
-        valid_experiments.sort(
-            key=lambda x: x["metrics"][metric], reverse=not minimize
-        )
+        valid_experiments.sort(key=lambda x: x["metrics"][metric], reverse=not minimize)
 
         return valid_experiments[0]
 
