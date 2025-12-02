@@ -2,72 +2,156 @@
 layout: default
 title: Home
 nav_order: 1
+description: "SLM Builder - Build, train, and deploy specialized language models"
+permalink: /
 ---
 
-# SLM Builder Documentation
+# SLM Builder
+{: .fs-9 }
 
-Welcome to the comprehensive documentation for **SLM Builder** - an end-to-end Python toolkit for creating, training, and deploying specialized language models.
+A comprehensive Python toolkit for creating, training, and deploying specialized language models with support for multiple data sources, training methods, and deployment formats.
+{: .fs-6 .fw-300 }
 
-## 🚀 Getting Started
+[Get Started](guides/quick-start){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
+[View on GitHub](https://github.com/isathish/slm){: .btn .fs-5 .mb-4 .mb-md-0 }
 
-New to SLM Builder? Start here:
+---
 
-1. **[Installation Guide](INSTALLATION.md)** - Get SLM Builder up and running
-2. **[Quick Reference](QUICK_REFERENCE.md)** - Cheat sheet for common tasks
-3. **[Examples](EXAMPLES.md)** - Learn by example
+{: .warning }
+> **Version 1.0.0** - Production Ready
 
-## 📚 Core Documentation
+## Quick Start
+
+```python
+from slm_builder import SLMBuilder
+
+# Create a QA model
+builder = SLMBuilder(
+    project_name="my-qa-model",
+    base_model="google/flan-t5-small"
+)
+
+# Load data and train
+builder.load_data_from_csv("qa_data.csv")
+builder.train(epochs=3, learning_rate=2e-5)
+
+# Evaluate and export
+metrics = builder.evaluate()
+builder.export_model("./output", format="huggingface")
+```
+
+---
+
+## 📚 Documentation
+
+### Getting Started
+{: .text-delta }
+
+| Guide | Description |
+|:------|:------------|
+| [**Installation**](INSTALLATION) | Complete installation instructions |
+| [**Quick Start**](guides/quick-start) | Build your first model in 5 minutes |
+| [**Basic Concepts**](guides/concepts) | Core concepts and architecture |
+| [**Quick Reference**](QUICK_REFERENCE) | Cheat sheet for common tasks |
 
 ### Features
+{: .text-delta }
 
-- **[Core Features](FEATURES.md)** - Dynamic model loading, quantization, evaluation
-- **[Additional Features](ADDITIONAL_FEATURES.md)** - Database loading, API integration, model comparison
+| Feature | Description |
+|:--------|:------------|
+| [**Model Loading**](features/model-loading) | Load from HuggingFace, local, Ollama, GGUF |
+| [**Data Sources**](features/data-sources) | 14 data sources: SQL, MongoDB, APIs, files |
+| [**Training**](features/training) | LoRA, QLoRA, full fine-tuning |
+| [**Evaluation**](features/evaluation) | Comprehensive metrics and benchmarks |
+| [**Quantization**](features/quantization) | 4-bit and 8-bit compression |
+| [**Model Comparison**](features/model-comparison) | Benchmark multiple models |
+| [**Export**](features/export) | ONNX, TorchScript, HuggingFace |
+
+### Examples
+{: .text-delta }
+
+| Category | Examples |
+|:---------|:---------|
+| [**Getting Started**](examples/getting-started) | Basic usage patterns |
+| [**Database Integration**](examples/database-integration) | PostgreSQL, MySQL, MongoDB, Redis |
+| [**API Integration**](examples/api-integration) | REST APIs, authenticated endpoints |
+| [**Advanced**](examples/advanced-examples) | Production use cases |
+
+### Reference
+{: .text-delta }
+
+| Document | Description |
+|:---------|:------------|
+| [**API Reference**](reference/api) | Complete API documentation |
+| [**Configuration**](reference/configuration) | All configuration options |
+| [**CLI Reference**](reference/cli) | Command-line interface |
 
 ### Development
+{: .text-delta }
 
-- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to the project
-- **[Changelog](CHANGELOG.md)** - Version history and changes
-- **[Release Guide](RELEASE_GUIDE.md)** - How to create new releases
+| Guide | Description |
+|:------|:------------|
+| [**Developer Guide**](DEVELOPER_GUIDE) | Contributing and development |
+| [**Changelog**](CHANGELOG) | Version history |
 
-## 📊 Project Status
+---
 
-### Implementation Reports
+## ✨ Key Features
 
-- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Overview of implemented features
-- **[Completion Report](COMPLETION_REPORT.md)** - Final completion status
-- **[TODO Completion](TODO_COMPLETION.md)** - Completed tasks checklist
-- **[Development Checklist](CHECKLIST.md)** - Feature implementation checklist
-- **[Setup Complete](SETUP_COMPLETE.md)** - Setup and configuration status
+<div class="code-example" markdown="1">
 
-## 🎯 Quick Navigation
+### 🎯 **14 Data Sources**
+CSV, JSON, JSONL, Parquet, SQL (PostgreSQL, MySQL, SQLite), MongoDB, Redis, Elasticsearch, REST APIs, and more.
 
-### By Use Case
+### 🚀 **Flexible Training**
+LoRA fine-tuning, QLoRA (4-bit), full fine-tuning, custom configurations.
 
-- **Building QA Models**: [Quick Reference](QUICK_REFERENCE.md#qa-model) → [Examples](EXAMPLES.md#qa-examples)
-- **Database Integration**: [Additional Features](ADDITIONAL_FEATURES.md#database-loaders) → [Examples](EXAMPLES.md#database-examples)
-- **API Data Loading**: [Additional Features](ADDITIONAL_FEATURES.md#api-loaders) → [Examples](EXAMPLES.md#api-examples)
-- **Model Comparison**: [Additional Features](ADDITIONAL_FEATURES.md#model-comparison) → [Examples](EXAMPLES.md#comparison-examples)
+### 📊 **Advanced Evaluation**
+Perplexity, BLEU, ROUGE, F1, accuracy, and task-specific metrics.
 
-### By Feature
+### ⚡ **Optimized Performance**
+Quantization, GPU/CPU support, batch processing, efficient inference.
 
-- **Data Sources**: [Core Features](FEATURES.md#data-sources)
-- **Model Loading**: [Core Features](FEATURES.md#model-loading)
-- **Training Methods**: [Core Features](FEATURES.md#training)
-- **Evaluation Metrics**: [Core Features](FEATURES.md#evaluation)
-- **Export Formats**: [Core Features](FEATURES.md#export)
+### 📦 **Multiple Exports**
+HuggingFace Hub, ONNX, TorchScript, TensorFlow, local deployment.
 
-## 🔧 Advanced Topics
+### 🔧 **Production Ready**
+MLflow tracking, dataset splitting, model comparison, comprehensive logging.
 
-- **Dataset Splitting & Validation**: [Additional Features](ADDITIONAL_FEATURES.md#dataset-splitting)
-- **Experiment Tracking**: [Additional Features](ADDITIONAL_FEATURES.md#experiment-tracking)
-- **Quantization**: [Core Features](FEATURES.md#quantization)
-- **Custom Preprocessing**: [Examples](EXAMPLES.md#custom-preprocessing)
+</div>
 
-## 🤝 Community
+---
 
-- **[GitHub Repository](https://github.com/isathish/slm)**
-- **[Issue Tracker](https://github.com/isathish/slm/issues)**
-- **[Discussions](https://github.com/isathish/slm/discussions)**
+## 🎯 Use Cases
+
+### Customer Support Bot
+Build an intelligent QA bot from support tickets:
+```python
+builder.load_from_database(
+    connection_params={"dialect": "postgresql"},
+    query="SELECT question, answer FROM support_tickets"
+)
+```
+
+### Document Intelligence  
+Extract insights from document collections:
+```python
+builder.load_from_elasticsearch(
+    host="localhost:9200",
+    index="documents"
+)
+```
+
+### API-Driven Models
+Train on data from REST APIs:
+```python
+builder.load_from_api(
+    endpoint="https://api.example.com/data",
+    headers={"Authorization": "Bearer TOKEN"}
+)
+```
+
+---
 
 ## 📦 Installation
 
@@ -82,53 +166,33 @@ pip install slm-builder[db]
 pip install slm-builder[all]
 ```
 
-See [Installation Guide](INSTALLATION.md) for detailed instructions.
-
-## ✨ Key Features
-
-- 📥 **14 Data Sources**: CSV, JSONL, SQL, MongoDB, REST APIs, and more
-- 🎯 **Multiple Tasks**: QA, classification, generation, instruction-tuning
-- 🚀 **Easy Training**: Pre-configured recipes (LoRA, full fine-tuning)
-- 💻 **CPU & GPU Support**: Optimized for both environments
-- 📊 **Model Comparison**: Benchmark multiple models
-- 🔬 **Advanced Metrics**: Perplexity, BLEU, ROUGE, F1
-- ⚡ **Quantization**: 4-bit and 8-bit compression
-- 📦 **Multiple Exports**: ONNX, TorchScript, HuggingFace
-
-## 🎓 Learning Path
-
-### Beginner
-1. Read [Installation Guide](INSTALLATION.md)
-2. Try [Quick Reference](QUICK_REFERENCE.md) examples
-3. Explore [Basic Examples](EXAMPLES.md#basic-examples)
-
-### Intermediate
-1. Learn about [Core Features](FEATURES.md)
-2. Try [Database Loading](EXAMPLES.md#database-examples)
-3. Experiment with [Model Comparison](EXAMPLES.md#comparison-examples)
-
-### Advanced
-1. Study [Additional Features](ADDITIONAL_FEATURES.md)
-2. Read [Contributing Guide](CONTRIBUTING.md)
-3. Create custom implementations
-
-## 📝 Documentation Format
-
-This documentation is available in multiple formats:
-
-- **GitHub Pages**: [https://isathish.github.io/slm/](https://isathish.github.io/slm/)
-- **GitHub Wiki**: [https://github.com/isathish/slm/wiki](https://github.com/isathish/slm/wiki)
-- **Source Files**: [docs/](https://github.com/isathish/slm/tree/main/docs)
-
-## 🔄 Updates
-
-Documentation is automatically updated:
-- **GitHub Pages**: On every push to `main` branch
-- **GitHub Wiki**: On every documentation change
-- **Version**: Updated on each release
+See the [Installation Guide](INSTALLATION) for detailed instructions.
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: December 2, 2025  
-**Status**: ✅ Production Ready
+## 🤝 Community & Support
+
+### Get Help
+- [GitHub Issues](https://github.com/isathish/slm/issues) - Report bugs
+- [Discussions](https://github.com/isathish/slm/discussions) - Ask questions
+- [Documentation](https://isathish.github.io/slm/) - Guides and references
+
+### Contribute
+We welcome contributions! See our [Developer Guide](DEVELOPER_GUIDE) to get started.
+
+---
+
+## 📊 Project Status
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Tests](https://img.shields.io/badge/tests-passing-success)
+
+**Last Updated**: December 2, 2025
+
+---
+
+## License
+
+SLM Builder is released under the MIT License. See [LICENSE](https://github.com/isathish/slm/blob/main/LICENSE) for details.

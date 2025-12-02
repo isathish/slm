@@ -1,32 +1,54 @@
 # Jekyll configuration for SLM Builder documentation
 
 # Site settings
-title: SLM Builder Documentation
-description: Build Small/Specialized Language Models from any dataset, source, or topic
+title: SLM Builder
+description: Build, train, and deploy specialized language models from any data source
 baseurl: "/slm"
 url: "https://isathish.github.io"
 
-# Theme - Using just-the-docs for better multi-page navigation
+# Theme - Using just-the-docs for wiki-style documentation
 remote_theme: just-the-docs/just-the-docs
 color_scheme: light
 
-# Aux links for header
+# Aux links for header (top right navigation)
 aux_links:
   "GitHub":
-    - "https://github.com/isathish/slm"
+  - "https://github.com/isathish/slm"
+  "Issues":
+  - "https://github.com/isathish/slm/issues"
+aux_links_new_tab: true
 
 # Footer
-footer_content: "Copyright &copy; 2025 SLM Builder. MIT License."
+footer_content: "Copyright &copy; 2025 SLM Builder. Distributed under the MIT License."
 
 # Search
 search_enabled: true
 search:
   heading_level: 2
   previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
 
 # Navigation
 nav_enabled: true
 heading_anchors: true
+back_to_top: true
+back_to_top_text: "Back to top"
+
+# Code copy button
+enable_copy_code_button: true
+
+# Callouts (for highlight boxes)
+callouts_level: loud
+callouts:
+  highlight:
+    color: yellow
+  important:
+    color: blue
+  note:
+    color: purple
+  warning:
+    color: red
 
 # Build settings
 markdown: kramdown
@@ -39,21 +61,21 @@ kramdown:
 
 # Plugins
 plugins:
-  - jekyll-feed
-  - jekyll-seo-tag
-  - jekyll-sitemap
-  - jekyll-remote-theme
+- jekyll-feed
+- jekyll-seo-tag
+- jekyll-sitemap
+- jekyll-remote-theme
 
 # Exclude
 exclude:
-  - Gemfile
-  - Gemfile.lock
-  - node_modules
-  - vendor
+- Gemfile
+- Gemfile.lock
+- node_modules
+- vendor
 
 # Defaults for front matter
 defaults:
-  - scope:
-      path: ""
-    values:
-      layout: default
+- scope:
+    path: ""
+  values:
+    layout: default
