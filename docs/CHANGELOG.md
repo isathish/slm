@@ -1,5 +1,38 @@
 # Changelog
 
+## [v1.0.1] - 2025-12-02
+
+### 🚨 Major Release
+This is a major release with significant new features and potential breaking changes.
+
+### 📊 Release Statistics
+- **Commits**: 15 total
+- **Release Type**: major
+- **Date**: December 02, 2025
+
+### ✨ New Features
+- feat: Enhance release workflow with comprehensive release notes generation and update documentation structure (4e3bdde)
+- feat: Add comprehensive documentation and release setup for SLM Builder (0e11277)
+- feat: Add comprehensive examples and completion documentation; update contributing guidelines (000f1d8)
+- feat: Add database loaders for SQL and MongoDB (d37e1a9)
+- feat: Enhance model loading and evaluation capabilities (067540b)
+- feat: Implement FastAPI server for SLM model serving (6a02e24)
+
+### 🐛 Bug Fixes
+- fix: Correct import order for model export and quantization functions (82b6296)
+
+### 📚 Documentation
+- feat: Enhance release workflow with comprehensive release notes generation and update documentation structure (4e3bdde)
+
+### ♻️ Code Refactoring
+- refactor: Simplify list comprehensions and sorting in model comparison (c050aca)
+- refactor: Clean up unused imports and improve code readability across multiple files (37e742e)
+
+### 🔧 Maintenance
+- chore: Remove obsolete GitHub Actions workflow for publishing documentation to Wiki (2e3a3c0)
+
+
+
 ## [v1.0.0] - 2025-12-02
 
 ### 🚨 Major Release
