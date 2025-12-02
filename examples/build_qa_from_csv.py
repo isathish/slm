@@ -23,7 +23,7 @@ def main():
                 "epochs": 3,
                 "batch_size": 8,
             }
-        }
+        },
     )
 
     print("\n✅ Training complete!")
@@ -33,7 +33,7 @@ def main():
     # Export to ONNX for CPU deployment
     print("\n📦 Exporting to ONNX...")
     exported = builder.export(
-        model_dir=result['model_dir'],
+        model_dir=result["model_dir"],
         format="onnx",
         optimize_for="cpu",
     )

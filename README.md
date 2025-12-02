@@ -99,6 +99,17 @@ result = builder.build_from_csv(
 )
 ```
 
+### More Examples
+
+Check the `examples/` directory for comprehensive examples:
+
+- **[build_from_database.py](examples/build_from_database.py)** - Load data from PostgreSQL database
+- **[build_from_mongodb.py](examples/build_from_mongodb.py)** - Load data from MongoDB
+- **[build_from_api.py](examples/build_from_api.py)** - Load data from REST APIs with authentication
+- **[dataset_splitting.py](examples/dataset_splitting.py)** - Dataset validation and splitting strategies
+- **[model_comparison.py](examples/model_comparison.py)** - Compare and benchmark multiple models
+- **[build_qa_from_csv.py](examples/build_qa_from_csv.py)** - Basic QA model training
+
 ### Custom Preprocessing
 
 ```python
