@@ -1,0 +1,139 @@
+name: Version Bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Type of version bump'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+      create_release:
+        description: 'Create release after version bump'
+        required: true
+        type: boolean
+        default: true
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Get current version
+        id: current_version
+        run: |
+          # Try to get version from setup.py
+          if [ -f setup.py ]; then
+            VERSION=$(grep -oP "version=['\"]([0-9]+\.[0-9]+\.[0-9]+)" setup.py | cut -d'"' -f2 || echo "0.0.0")
+          else
+            # Get latest tag or default to 0.0.0
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo "0.0.0")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION"
+      
+      - name: Calculate new version
+        id: new_version
+        run: |
+          CURRENT="${{ steps.current_version.outputs.version }}"
+          BUMP_TYPE="${{ github.event.inputs.bump_type }}"
+          
+          # Parse version
+          IFS='.' read -r major minor patch <<< "$CURRENT"
+          
+          # Bump version based on type
+          case $BUMP_TYPE in
+            major)
+              major=$((major + 1))
+              minor=0
+              patch=0
+              ;;
+            minor)
+              minor=$((minor + 1))
+              patch=0
+              ;;
+            patch)
+              patch=$((patch + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="$major.$minor.$patch"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+      
+      - name: Update version in files
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.version }}"
+          
+          # Update setup.py if it exists
+          if [ -f setup.py ]; then
+            sed -i "s/version=['\"][0-9.]*['\"]/version=\"$NEW_VERSION\"/" setup.py
+          fi
+          
+          # Update __init__.py if it has version
+          if [ -f slm_builder/__init__.py ]; then
+            if grep -q "__version__" slm_builder/__init__.py; then
+              sed -i "s/__version__ = ['\"][0-9.]*['\"]/__version__ = \"$NEW_VERSION\"/" slm_builder/__init__.py
+            else
+              echo "__version__ = \"$NEW_VERSION\"" >> slm_builder/__init__.py
+            fi
+          fi
+          
+          echo "Updated version to $NEW_VERSION"
+      
+      - name: Create version bump commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "🔖 Bump version to ${{ steps.new_version.outputs.version }}"
+          git push
+      
+      - name: Create and push tag
+        run: |
+          git tag -a "${{ steps.new_version.outputs.tag }}" -m "Release ${{ steps.new_version.outputs.version }}"
+          git push origin "${{ steps.new_version.outputs.tag }}"
+      
+      - name: Trigger release workflow
+        if: github.event.inputs.create_release == 'true'
+        run: |
+          gh workflow run release.yml
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## ✅ Version Bump Complete
+          
+          - **Previous Version**: ${{ steps.current_version.outputs.version }}
+          - **New Version**: ${{ steps.new_version.outputs.version }}
+          - **Bump Type**: ${{ github.event.inputs.bump_type }}
+          - **Tag Created**: ${{ steps.new_version.outputs.tag }}
+          - **Release**: ${{ github.event.inputs.create_release == 'true' && 'Will be created' || 'Skipped' }}
+          
+          ### Next Steps
+          
+          $( if [ "${{ github.event.inputs.create_release }}" == "true" ]; then
+            echo "The release workflow has been triggered. Check the [Actions](https://github.com/${{ github.repository }}/actions) tab for progress."
+          else
+            echo "To create a release, run the \`Create Release\` workflow manually or push the tag."
+          fi )
+          EOF

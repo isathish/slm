@@ -1,0 +1,239 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v1.2.3, etc.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Type of release'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install setuptools wheel twine
+      
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            # Determine release type from version
+            if [[ "$VERSION" =~ ^[0-9]+\.0\.0$ ]]; then
+              RELEASE_TYPE="major"
+            elif [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.0$ ]]; then
+              RELEASE_TYPE="minor"
+            else
+              RELEASE_TYPE="patch"
+            fi
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          RELEASE_TYPE="${{ steps.version.outputs.release_type }}"
+          
+          # Create release notes
+          cat > release_notes.md << EOF
+          # SLM Builder v$VERSION
+          
+          ## Release Type: ${RELEASE_TYPE^^}
+          
+          $(if [ "$RELEASE_TYPE" == "major" ]; then
+            echo "This is a major release with significant new features and potential breaking changes."
+          elif [ "$RELEASE_TYPE" == "minor" ]; then
+            echo "This is a minor release with new features and improvements."
+          else
+            echo "This is a patch release with bug fixes and minor improvements."
+          fi)
+          
+          ## 📦 Installation
+          
+          \`\`\`bash
+          pip install slm-builder==$VERSION
+          \`\`\`
+          
+          ## 🎯 What's Included
+          
+          ### Core Features
+          - 📥 Multiple data source support (CSV, JSONL, SQL, MongoDB, APIs)
+          - 🎯 Task-specific training (QA, classification, generation, instruction-tuning)
+          - 🚀 Easy training with pre-configured recipes (LoRA, full fine-tuning)
+          - 💻 CPU & GPU support with hardware auto-detection
+          - 📦 Multiple export formats (ONNX, TorchScript, HuggingFace)
+          
+          ### Advanced Features
+          - 🔀 Dynamic model loading from HuggingFace Hub, local paths, Ollama, GGUF files
+          - ⚖️ Smart dataset splitting with stratification and K-fold cross-validation
+          - 🗄️ Database integration (PostgreSQL, MySQL, SQLite, MongoDB)
+          - 🌐 REST API data loading with authentication and pagination
+          - 📊 Model comparison and benchmarking
+          - 📈 Experiment tracking
+          - 🔬 Advanced evaluation metrics (Perplexity, BLEU, ROUGE, Accuracy, F1)
+          - ⚡ Quantization support (4-bit, 8-bit)
+          
+          ## 📚 Documentation
+          
+          - [Main Documentation](https://github.com/${{ github.repository }}/blob/main/README.md)
+          - [Features Guide](https://github.com/${{ github.repository }}/wiki/Features)
+          - [Examples](https://github.com/${{ github.repository }}/wiki/Examples)
+          - [Contributing](https://github.com/${{ github.repository }}/wiki/Contributing)
+          
+          ## 🔗 Links
+          
+          - [GitHub Repository](https://github.com/${{ github.repository }})
+          - [Documentation Wiki](https://github.com/${{ github.repository }}/wiki)
+          - [Examples Directory](https://github.com/${{ github.repository }}/tree/main/examples)
+          
+          ## 📝 Changelog
+          
+          For detailed changes, see the [commit history](https://github.com/${{ github.repository }}/commits/v$VERSION).
+          
+          ---
+          
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/...v$VERSION
+          EOF
+          
+          echo "Release notes generated"
+      
+      - name: Create Git tag (if workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.tag }}" -m "Release ${{ steps.version.outputs.version }}"
+          git push origin "${{ steps.version.outputs.tag }}"
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "Release ${{ steps.version.outputs.version }}"
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build package
+        run: |
+          # Create setup.py if it doesn't exist
+          if [ ! -f setup.py ]; then
+            cat > setup.py << 'EOF'
+          from setuptools import setup, find_packages
+          
+          with open("README.md", "r", encoding="utf-8") as fh:
+              long_description = fh.read()
+          
+          setup(
+              name="slm-builder",
+              version="${{ steps.version.outputs.version }}",
+              author="SLM Builder Team",
+              description="Build Small/Specialized Language Models from any dataset, source, or topic",
+              long_description=long_description,
+              long_description_content_type="text/markdown",
+              url="https://github.com/${{ github.repository }}",
+              packages=find_packages(),
+              classifiers=[
+                  "Development Status :: 4 - Beta",
+                  "Intended Audience :: Developers",
+                  "Intended Audience :: Science/Research",
+                  "License :: OSI Approved :: MIT License",
+                  "Programming Language :: Python :: 3",
+                  "Programming Language :: Python :: 3.8",
+                  "Programming Language :: Python :: 3.9",
+                  "Programming Language :: Python :: 3.10",
+                  "Programming Language :: Python :: 3.11",
+                  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+              ],
+              python_requires=">=3.8",
+              install_requires=[
+                  "torch>=2.0.0",
+                  "transformers>=4.30.0",
+                  "datasets>=2.12.0",
+                  "peft>=0.4.0",
+                  "accelerate>=0.20.0",
+                  "bitsandbytes>=0.40.0",
+              ],
+              extras_require={
+                  "full": [
+                      "sqlalchemy>=2.0.0",
+                      "psycopg2-binary>=2.9.0",
+                      "pymongo>=4.0.0",
+                      "pymysql>=1.0.0",
+                      "requests>=2.28.0",
+                      "tqdm>=4.65.0",
+                      "nltk>=3.8.0",
+                      "rouge-score>=0.1.0",
+                  ],
+                  "dev": [
+                      "black>=23.0.0",
+                      "isort>=5.12.0",
+                      "flake8>=6.0.0",
+                      "pytest>=7.3.0",
+                  ],
+              },
+              entry_points={
+                  "console_scripts": [
+                      "slm=slm_builder.cli:main",
+                  ],
+              },
+          )
+          EOF
+          fi
+          
+          python setup.py sdist bdist_wheel
+      
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          files: |
+            dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Comment on commit
+        run: |
+          COMMIT_SHA="${{ github.sha }}"
+          gh api repos/${{ github.repository }}/commits/$COMMIT_SHA/comments \
+            -f body="🎉 Release ${{ steps.version.outputs.version }} has been published! [View Release](https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.tag }})"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

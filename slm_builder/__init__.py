@@ -14,7 +14,7 @@ Example:
     >>> result = builder.build_from_csv('data.csv', task='qa', recipe='lora')
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 __author__ = "SLM Builder Team"
 
 from slm_builder.api import SLMBuilder

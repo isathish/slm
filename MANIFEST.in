@@ -1,5 +1,7 @@
 include README.md
 include LICENSE
+include VERSION
+include CHANGELOG.md
 include pyproject.toml
 recursive-include slm_builder *.py
 recursive-include examples *.py *.yml *.csv *.jsonl

@@ -1,0 +1,62 @@
+# Jekyll configuration for SLM Builder documentation
+
+# Site settings
+title: SLM Builder Documentation
+description: >-
+  Build Small/Specialized Language Models from any dataset, source, or topic. Complete documentation for the SLM Builder toolkit.
+
+baseurl: "/slm"
+url: "https://isathish.github.io"
+
+# Theme
+theme: jekyll-theme-cayman
+# Alternative themes: minima, jekyll-theme-slate, jekyll-theme-modernist
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name
+
+# Defaults
+defaults:
+- scope:
+    path: ""
+    type: "docs"
+  values:
+    layout: "default"
+
+# Plugins
+plugins:
+- jekyll-feed
+- jekyll-seo-tag
+- jekyll-sitemap
+
+# Exclude from processing
+exclude:
+- Gemfile
+- Gemfile.lock
+- node_modules
+- vendor
+
+# Include files
+include:
+- _pages
+
+# Navigation
+nav_order:
+- README.md
+- INSTALLATION.md
+- QUICK_REFERENCE.md
+- FEATURES.md
+- ADDITIONAL_FEATURES.md
+- EXAMPLES.md
+- CONTRIBUTING.md
+- CHANGELOG.md
+- RELEASE_GUIDE.md

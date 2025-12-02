@@ -1,0 +1,127 @@
+name: Publish Documentation to Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - '.github/workflows/publish-wiki.yml'
+  workflow_dispatch:
+
+jobs:
+  publish-wiki:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Checkout wiki repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Copy documentation to wiki
+        run: |
+          # Create wiki directory structure
+          mkdir -p wiki
+          
+          # Copy main documentation files
+          cp docs/FEATURES.md wiki/Features.md
+          cp docs/ADDITIONAL_FEATURES.md wiki/Additional-Features.md
+          cp docs/EXAMPLES.md wiki/Examples.md
+          cp docs/CONTRIBUTING.md wiki/Contributing.md
+          cp docs/CHECKLIST.md wiki/Development-Checklist.md
+          
+          # Create Home page from README
+          cat > wiki/Home.md << 'EOF'
+          # Welcome to SLM Builder Wiki
+          
+          This wiki contains comprehensive documentation for the SLM Builder toolkit.
+          
+          ## 📚 Documentation
+          
+          ### User Documentation
+          - **[Features](Features)** - Core features and dynamic model loading
+          - **[Additional Features](Additional-Features)** - Advanced features and integrations
+          - **[Examples](Examples)** - Comprehensive usage examples
+          
+          ### Developer Documentation
+          - **[Contributing](Contributing)** - Contribution guidelines
+          - **[Development Checklist](Development-Checklist)** - Feature implementation status
+          
+          ## 🚀 Quick Start
+          
+          ```bash
+          # Install
+          pip install slm-builder
+          
+          # Build your first model
+          from slm_builder import SLMBuilder
+          builder = SLMBuilder(project_name="my-slm")
+          result = builder.build_from_csv("data.csv", task="qa", recipe="lora")
+          ```
+          
+          ## 📖 Topics
+          
+          - [Database Integration](Examples#database-integration)
+          - [API Data Loading](Examples#api-integration)
+          - [Model Comparison](Examples#model-comparison)
+          - [Dataset Preparation](Examples#data-preparation)
+          
+          ## 🔗 Links
+          
+          - [GitHub Repository](https://github.com/${{ github.repository }})
+          - [Main README](https://github.com/${{ github.repository }}/blob/main/README.md)
+          - [Examples Directory](https://github.com/${{ github.repository }}/tree/main/examples)
+          
+          ---
+          
+          **Last Updated**: $(date +%Y-%m-%d)
+          EOF
+          
+          # Create sidebar
+          cat > wiki/_Sidebar.md << 'EOF'
+          ## 📚 Documentation
+          
+          ### User Guides
+          * [Home](Home)
+          * [Features](Features)
+          * [Additional Features](Additional-Features)
+          * [Examples](Examples)
+          
+          ### Developer Guides
+          * [Contributing](Contributing)
+          * [Development Checklist](Development-Checklist)
+          
+          ### Quick Links
+          * [Main Repository](https://github.com/${{ github.repository }})
+          * [Examples](https://github.com/${{ github.repository }}/tree/main/examples)
+          EOF
+      
+      - name: Commit and push to wiki
+        run: |
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          
+          if git diff --staged --quiet; then
+            echo "No changes to wiki"
+          else
+            git commit -m "📚 Update documentation from main branch"
+            git push
+            echo "Wiki updated successfully"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
