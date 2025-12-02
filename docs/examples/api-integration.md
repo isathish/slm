@@ -2,7 +2,7 @@
 layout: default
 title: API Integration
 parent: Examples
-nav_order: 3
+nav_order: 5
 ---
 
 # API Integration Examples

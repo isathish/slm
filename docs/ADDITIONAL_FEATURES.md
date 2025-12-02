@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Additional Features
-nav_order: 6
+parent: Examples
+nav_order: 2
 ---
 
 # Additional Features Documentation

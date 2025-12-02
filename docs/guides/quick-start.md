@@ -1,11 +1,11 @@
 ---
 layout: default
-title: Quick Start
+title: Overview
 parent: Guides
-nav_order: 1
+nav_order: 2
 ---
 
-# Quick Start Guide
+# Overview
 {: .no_toc }
 
 Get started with SLM Builder in under 5 minutes.

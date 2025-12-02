@@ -6,8 +6,10 @@ has_children: true
 ---
 
 # Guides
+{: .no_toc }
 
 Comprehensive guides to help you get started and master SLM Builder.
+{: .fs-6 .fw-300 }
 
 ## Getting Started
 

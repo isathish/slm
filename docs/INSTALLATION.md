@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Installation
-nav_order: 3
+parent: Guides
+nav_order: 1
 ---
 
 # Installation Guide

@@ -1,8 +1,8 @@
 ---
 layout: default
 title: Core Features
-nav_order: 5
-has_children: false
+parent: Examples
+nav_order: 1
 ---
 
 # SLM-Builder: New Features & Enhancements

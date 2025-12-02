@@ -1,3 +1,9 @@
+---
+layout: default
+title: Changelog
+nav_order: 5
+---
+
 # Changelog
 
 ## [v1.0.1] - 2025-12-02

@@ -1,7 +1,8 @@
 ---
 layout: default
 title: Quick Reference
-nav_order: 4
+parent: Guides
+nav_order: 3
 ---
 
 # 🚀 Quick Reference - Documentation & Releases
