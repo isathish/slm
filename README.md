@@ -6,7 +6,8 @@ SLM-Builder is an end-to-end Python toolkit for creating, training, and deployin
 
 ## ✨ Features
 
-- 📥 **Multiple Data Sources**: Load from CSV, JSONL, text files, URLs, or databases
+### Core Features
+- 📥 **Multiple Data Sources**: Load from CSV, JSONL, text files, URLs, databases (SQL, MongoDB), or REST APIs
 - 🎯 **Task-Specific**: Support for QA, classification, generation, and instruction-tuning
 - 🚀 **Easy Training**: Pre-configured recipes (LoRA, full fine-tuning, instruction-tuning)
 - 💻 **CPU & GPU Support**: Optimized for both environments with hardware auto-detection
@@ -14,6 +15,20 @@ SLM-Builder is an end-to-end Python toolkit for creating, training, and deployin
 - 📦 **Export Options**: ONNX, TorchScript, or HuggingFace format
 - 🌐 **Production Ready**: FastAPI server template included
 - 🔒 **Security First**: PII detection and license checking
+
+### Advanced Features
+- 🔀 **Dynamic Model Loading**: Load from HuggingFace Hub, Local paths, Ollama, GGUF files, HTTP/S3 URLs
+- ⚖️ **Smart Dataset Splitting**: Train/val/test splits with stratification and K-fold cross-validation
+- 🗄️ **Database Integration**: Direct loading from PostgreSQL, MySQL, SQLite, MongoDB
+- 🌐 **API Data Loading**: REST API support with authentication and pagination
+- 📊 **Model Comparison**: Benchmark multiple models with comprehensive metrics
+- 📈 **Experiment Tracking**: Track hyperparameters, metrics, and model versions
+- 🔬 **Advanced Evaluation**: Perplexity, BLEU, ROUGE, Accuracy, F1 scores
+- ⚡ **Quantization**: 4-bit and 8-bit model quantization for efficiency
+- 🔍 **Dataset Validation**: Automatic quality checking and class balance analysis
+
+📖 **[View Advanced Features Documentation →](FEATURES.md)**  
+📖 **[View Additional Features Documentation →](ADDITIONAL_FEATURES.md)**
 
 ## 🚀 Quick Start
 

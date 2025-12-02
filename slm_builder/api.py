@@ -217,6 +217,139 @@ class SLMBuilder:
 
         return self._build_pipeline(records, output_dir=output_dir)
 
+    def build_from_database(
+        self,
+        query: str,
+        connection_params: Dict[str, Any],
+        db_type: str = "sql",
+        task: str = "qa",
+        recipe: str = "lora",
+        output_dir: Optional[str] = None,
+        column_mapping: Optional[Dict[str, str]] = None,
+        overrides: Optional[Dict] = None,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """Build SLM from database (SQL or MongoDB).
+
+        Args:
+            query: SQL query or MongoDB collection name
+            connection_params: Database connection parameters
+            db_type: Database type ('sql' or 'mongodb')
+            task: Task type
+            recipe: Training recipe
+            output_dir: Optional output directory
+            column_mapping: Column mapping for SQL
+            overrides: Configuration overrides
+            **kwargs: Additional database-specific arguments
+
+        Returns:
+            Build results dictionary
+
+        Example:
+            connection_params = {
+                'dialect': 'postgresql',
+                'host': 'localhost',
+                'port': 5432,
+                'database': 'mydb',
+                'user': 'user',
+                'password': 'pass'
+            }
+            result = builder.build_from_database(
+                query="SELECT * FROM training_data",
+                connection_params=connection_params,
+                db_type='sql',
+                task='qa'
+            )
+        """
+        from slm_builder.data import load_from_mongodb, load_from_sql
+
+        logger.info("Loading data from database", db_type=db_type, task=task)
+
+        if db_type.lower() == "sql":
+            records = load_from_sql(
+                query=query,
+                connection_params=connection_params,
+                task=task,
+                column_mapping=column_mapping,
+                **kwargs,
+            )
+        elif db_type.lower() == "mongodb":
+            records = load_from_mongodb(
+                collection_name=query,
+                connection_params=connection_params,
+                task=task,
+                **kwargs,
+            )
+        else:
+            raise ValueError(f"Unsupported database type: {db_type}")
+
+        logger.info("Loaded records from database", count=len(records))
+
+        return self.build_from_dataset(
+            records=records, task=task, recipe=recipe, output_dir=output_dir, overrides=overrides
+        )
+
+    def build_from_api(
+        self,
+        base_url: str,
+        endpoint: str = "",
+        task: str = "qa",
+        recipe: str = "lora",
+        auth: Optional[Dict[str, Any]] = None,
+        pagination: Optional[Dict[str, Any]] = None,
+        max_pages: int = 10,
+        output_dir: Optional[str] = None,
+        overrides: Optional[Dict] = None,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        """Build SLM from REST API data.
+
+        Args:
+            base_url: Base API URL
+            endpoint: API endpoint path
+            task: Task type
+            recipe: Training recipe
+            auth: Authentication configuration
+            pagination: Pagination configuration
+            max_pages: Maximum pages to fetch
+            output_dir: Optional output directory
+            overrides: Configuration overrides
+            **kwargs: Additional API loader arguments
+
+        Returns:
+            Build results dictionary
+
+        Example:
+            auth = {'type': 'bearer', 'token': 'your-token'}
+            pagination = {'type': 'offset', 'page_size': 100}
+            result = builder.build_from_api(
+                base_url='https://api.example.com',
+                endpoint='/training-data',
+                task='qa',
+                auth=auth,
+                pagination=pagination
+            )
+        """
+        from slm_builder.data import load_from_api
+
+        logger.info("Loading data from API", base_url=base_url, endpoint=endpoint)
+
+        records = load_from_api(
+            base_url=base_url,
+            task=task,
+            endpoint=endpoint,
+            auth=auth,
+            pagination=pagination,
+            max_pages=max_pages,
+            **kwargs,
+        )
+
+        logger.info("Loaded records from API", count=len(records))
+
+        return self.build_from_dataset(
+            records=records, task=task, recipe=recipe, output_dir=output_dir, overrides=overrides
+        )
+
     def _build_from_source(
         self,
         source: str,
@@ -378,6 +511,103 @@ class SLMBuilder:
 
         logger.info("Export complete", path=exported_path)
         return exported_path
+
+    def prepare_data(
+        self,
+        records: List[Dict[str, Any]],
+        validate: bool = True,
+        split: bool = False,
+        test_size: float = 0.2,
+        val_size: Optional[float] = None,
+        stratify_by: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Prepare dataset with validation and optional splitting.
+
+        Args:
+            records: Dataset records
+            validate: Whether to validate dataset quality
+            split: Whether to split into train/val/test
+            test_size: Test set proportion
+            val_size: Validation set proportion (if None, only train/test)
+            stratify_by: Field to stratify by
+
+        Returns:
+            Dictionary with 'train', 'val' (optional), 'test' (optional), 'report'
+        """
+        from slm_builder.data import split_dataset, validate_dataset
+
+        result = {}
+
+        # Validate if requested
+        if validate:
+            logger.info("Validating dataset")
+            report = validate_dataset(records, task=self.config.task, strict=False)
+            result["report"] = report
+            logger.info(
+                "Validation complete",
+                validity=f"{report['validity_rate']:.2%}",
+                errors=len(report["errors"]),
+            )
+
+        # Split if requested
+        if split:
+            logger.info("Splitting dataset", test_size=test_size, val_size=val_size)
+            splits = split_dataset(
+                records,
+                test_size=test_size,
+                val_size=val_size,
+                stratify_by=stratify_by,
+                shuffle=True,
+                random_state=42,
+            )
+
+            if val_size is not None:
+                result["train"], result["val"], result["test"] = splits
+                logger.info(
+                    "Dataset split",
+                    train=len(result["train"]),
+                    val=len(result["val"]),
+                    test=len(result["test"]),
+                )
+            else:
+                result["train"], result["test"] = splits
+                logger.info("Dataset split", train=len(result["train"]), test=len(result["test"]))
+        else:
+            result["train"] = records
+
+        return result
+
+    def compare_models_on_dataset(
+        self,
+        model_specs: List[tuple],
+        test_dataset: List[Dict[str, Any]],
+        metrics: List[str] = None,
+        output_dir: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Compare multiple models on a test dataset.
+
+        Args:
+            model_specs: List of (name, model, tokenizer) tuples
+            test_dataset: Test dataset
+            metrics: Metrics to evaluate (default: ['perplexity', 'accuracy'])
+            output_dir: Directory to save comparison reports
+
+        Returns:
+            Comparison results dictionary
+        """
+        from slm_builder.models import compare_models
+
+        if output_dir is None:
+            output_dir = str(self.work_dir / "model_comparisons")
+
+        logger.info("Comparing models", n_models=len(model_specs), n_samples=len(test_dataset))
+
+        results = compare_models(
+            models=model_specs, dataset=test_dataset, metrics=metrics, output_dir=output_dir
+        )
+
+        logger.info("Model comparison complete", rankings=results.get("rankings"))
+        return results
 
     def serve(self, model_dir: str, host: str = "0.0.0.0", port: int = 8080) -> None:
         """Start serving the model via FastAPI.

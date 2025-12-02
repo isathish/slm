@@ -1,6 +1,11 @@
 """Models package initialization."""
 
 from slm_builder.models.base import ModelFactory, generate_text
+from slm_builder.models.comparison import (
+    ExperimentTracker,
+    ModelComparator,
+    compare_models,
+)
 from slm_builder.models.evaluation import Evaluator, evaluate_model
 from slm_builder.models.export import create_model_bundle, export_to_onnx
 from slm_builder.models.peft_utils import apply_lora, merge_lora_adapters
@@ -31,4 +36,7 @@ __all__ = [
     "search_models",
     "Evaluator",
     "evaluate_model",
+    "ModelComparator",
+    "ExperimentTracker",
+    "compare_models",
 ]

@@ -2,6 +2,7 @@
 
 from slm_builder import SLMBuilder
 
+
 def main():
     # Initialize builder
     print("🚀 Initializing SLM Builder...")
@@ -25,7 +26,7 @@ def main():
         }
     )
 
-    print(f"\n✅ Training complete!")
+    print("\n✅ Training complete!")
     print(f"   Model: {result['model_dir']}")
     print(f"   Metrics: {result['metrics']}")
 
