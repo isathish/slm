@@ -11,7 +11,7 @@ from slm_builder.data.loaders import CSVLoader, JSONLLoader, load_dataset
 def test_csv_loader_qa():
     """Test CSV loader for QA task."""
     # Create temporary CSV file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
         f.write("question,answer\n")
         f.write("What is AI?,Artificial Intelligence\n")
         f.write("What is ML?,Machine Learning\n")
@@ -33,7 +33,7 @@ def test_csv_loader_qa():
 
 def test_jsonl_loader():
     """Test JSONL loader."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.jsonl', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
         f.write('{"id": "1", "text": "Hello", "task": "qa"}\n')
         f.write('{"id": "2", "text": "World", "task": "qa"}\n')
         jsonl_path = f.name
@@ -52,7 +52,7 @@ def test_jsonl_loader():
 
 def test_load_dataset_auto():
     """Test automatic loader detection."""
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".csv", delete=False) as f:
         f.write("question,answer\n")
         f.write("Test Q,Test A\n")
         csv_path = f.name

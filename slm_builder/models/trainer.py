@@ -24,7 +24,7 @@ class Trainer:
         output_dir: str,
     ):
         """Initialize trainer.
-        
+
         Args:
             config: SLM configuration
             model: Model to train
@@ -38,18 +38,15 @@ class Trainer:
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
     def train(
-        self,
-        train_dataset: Any,
-        eval_dataset: Optional[Any] = None,
-        **kwargs
+        self, train_dataset: Any, eval_dataset: Optional[Any] = None, **kwargs
     ) -> Dict[str, Any]:
         """Train model using specified recipe.
-        
+
         Args:
             train_dataset: Training dataset
             eval_dataset: Optional evaluation dataset
             **kwargs: Additional training arguments
-            
+
         Returns:
             Training results dictionary
         """
@@ -66,10 +63,7 @@ class Trainer:
             raise ValueError(f"Unsupported recipe: {recipe}")
 
     def _train_lora(
-        self,
-        train_dataset: Any,
-        eval_dataset: Optional[Any] = None,
-        **kwargs
+        self, train_dataset: Any, eval_dataset: Optional[Any] = None, **kwargs
     ) -> Dict[str, Any]:
         """Train with LoRA recipe."""
         try:
@@ -98,7 +92,7 @@ class Trainer:
             load_best_model_at_end=True if eval_dataset else False,
             seed=self.config.training.seed,
             report_to=[],  # Disable default reporting
-            **kwargs
+            **kwargs,
         )
 
         # Create trainer
@@ -117,7 +111,7 @@ class Trainer:
         # Save model
         best_model_dir = self.output_dir / "best"
         best_model_dir.mkdir(exist_ok=True)
-        
+
         trainer.save_model(str(best_model_dir))
         self.tokenizer.save_pretrained(str(best_model_dir))
 
@@ -140,10 +134,7 @@ class Trainer:
         return results
 
     def _train_finetune(
-        self,
-        train_dataset: Any,
-        eval_dataset: Optional[Any] = None,
-        **kwargs
+        self, train_dataset: Any, eval_dataset: Optional[Any] = None, **kwargs
     ) -> Dict[str, Any]:
         """Train with full fine-tuning recipe."""
         try:
@@ -169,7 +160,7 @@ class Trainer:
             load_best_model_at_end=True if eval_dataset else False,
             seed=self.config.training.seed,
             report_to=[],
-            **kwargs
+            **kwargs,
         )
 
         trainer = Trainer(
@@ -186,7 +177,7 @@ class Trainer:
         # Save
         best_model_dir = self.output_dir / "best"
         best_model_dir.mkdir(exist_ok=True)
-        
+
         trainer.save_model(str(best_model_dir))
         self.tokenizer.save_pretrained(str(best_model_dir))
 
@@ -207,10 +198,7 @@ class Trainer:
         return results
 
     def _train_instruction(
-        self,
-        train_dataset: Any,
-        eval_dataset: Optional[Any] = None,
-        **kwargs
+        self, train_dataset: Any, eval_dataset: Optional[Any] = None, **kwargs
     ) -> Dict[str, Any]:
         """Train with instruction-tuning recipe (uses LoRA by default)."""
         logger.info("Instruction tuning (using LoRA)")
@@ -223,12 +211,12 @@ def prepare_dataset_for_training(
     max_length: int = 512,
 ) -> Any:
     """Prepare dataset for training.
-    
+
     Args:
         records: List of records
         tokenizer: Tokenizer
         max_length: Maximum sequence length
-        
+
     Returns:
         HuggingFace Dataset object
     """
@@ -252,7 +240,7 @@ def prepare_dataset_for_training(
     # Create dataset
     dataset_dict = {"text": texts}
     dataset = Dataset.from_dict(dataset_dict)
-    
+
     # Tokenize
     tokenized = dataset.map(
         tokenize_function,

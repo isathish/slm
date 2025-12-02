@@ -8,27 +8,21 @@ from slm_builder.utils import get_logger
 logger = get_logger(__name__)
 
 
-def apply_lora(
-    model: Any,
-    lora_config: LoRAConfig,
-    **kwargs
-) -> Any:
+def apply_lora(model: Any, lora_config: LoRAConfig, **kwargs) -> Any:
     """Apply LoRA adapters to a model.
-    
+
     Args:
         model: Base model
         lora_config: LoRA configuration
         **kwargs: Additional PEFT arguments
-        
+
     Returns:
         Model with LoRA adapters applied
     """
     try:
         from peft import LoraConfig as PeftLoraConfig, get_peft_model
     except ImportError:
-        raise ImportError(
-            "peft not installed. Install with: pip install slm-builder[full]"
-        )
+        raise ImportError("peft not installed. Install with: pip install slm-builder[full]")
 
     logger.info("Applying LoRA adapters", r=lora_config.r, alpha=lora_config.lora_alpha)
 
@@ -40,12 +34,12 @@ def apply_lora(
         target_modules=lora_config.target_modules,
         bias=lora_config.bias,
         task_type=lora_config.task_type,
-        **kwargs
+        **kwargs,
     )
 
     # Apply PEFT
     model = get_peft_model(model, peft_config)
-    
+
     # Log trainable parameters
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     total = sum(p.numel() for p in model.parameters())
@@ -55,7 +49,7 @@ def apply_lora(
         "LoRA applied",
         trainable_params=trainable,
         total_params=total,
-        percentage=f"{percentage:.2f}%"
+        percentage=f"{percentage:.2f}%",
     )
 
     return model
@@ -63,10 +57,10 @@ def apply_lora(
 
 def merge_lora_adapters(model: Any) -> Any:
     """Merge LoRA adapters into base model.
-    
+
     Args:
         model: PEFT model with LoRA adapters
-        
+
     Returns:
         Merged model
     """
@@ -82,10 +76,10 @@ def merge_lora_adapters(model: Any) -> Any:
 
 def get_peft_model_info(model: Any) -> Dict[str, Any]:
     """Get information about PEFT model.
-    
+
     Args:
         model: PEFT model
-        
+
     Returns:
         Dictionary with PEFT info
     """
@@ -102,7 +96,7 @@ def get_peft_model_info(model: Any) -> Dict[str, Any]:
 
     trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
     total = sum(p.numel() for p in model.parameters())
-    
+
     info["trainable_parameters"] = trainable
     info["total_parameters"] = total
     info["trainable_percentage"] = 100 * trainable / total if total > 0 else 0
@@ -112,15 +106,16 @@ def get_peft_model_info(model: Any) -> Dict[str, Any]:
 
 def prepare_model_for_kbit_training(model: Any) -> Any:
     """Prepare model for k-bit training (8-bit, 4-bit).
-    
+
     Args:
         model: Model to prepare
-        
+
     Returns:
         Prepared model
     """
     try:
         from peft import prepare_model_for_kbit_training as peft_prepare
+
         logger.info("Preparing model for k-bit training")
         return peft_prepare(model)
     except ImportError:

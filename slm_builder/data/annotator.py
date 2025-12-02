@@ -15,7 +15,7 @@ class Annotator:
 
     def __init__(self, task: str = "qa"):
         """Initialize annotator.
-        
+
         Args:
             task: Task type (qa, classification, etc.)
         """
@@ -29,13 +29,13 @@ class Annotator:
         auto_launch: bool = True,
     ) -> str:
         """Launch Streamlit annotation UI.
-        
+
         Args:
             records: Records to annotate
             output_path: Path to save annotated records
             port: Port for Streamlit server
             auto_launch: Whether to auto-launch browser
-            
+
         Returns:
             Path to annotated records file
         """
@@ -44,26 +44,26 @@ class Annotator:
 
         # Create temporary app file
         app_code = self._generate_streamlit_app(records, output_path)
-        
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write(app_code)
             app_file = f.name
 
-        logger.info(
-            "Starting annotation UI",
-            port=port,
-            output=output_path,
-            records=len(records)
-        )
-        
+        logger.info("Starting annotation UI", port=port, output=output_path, records=len(records))
+
         # Launch Streamlit
         try:
-            subprocess.run([
-                "streamlit", "run",
-                app_file,
-                "--server.port", str(port),
-                "--server.headless", "false" if auto_launch else "true",
-            ])
+            subprocess.run(
+                [
+                    "streamlit",
+                    "run",
+                    app_file,
+                    "--server.port",
+                    str(port),
+                    "--server.headless",
+                    "false" if auto_launch else "true",
+                ]
+            )
         except KeyboardInterrupt:
             logger.info("Annotation UI stopped")
         finally:
@@ -72,15 +72,13 @@ class Annotator:
 
         return output_path
 
-    def _generate_streamlit_app(
-        self, records: List[Dict[str, Any]], output_path: str
-    ) -> str:
+    def _generate_streamlit_app(self, records: List[Dict[str, Any]], output_path: str) -> str:
         """Generate Streamlit app code for annotation."""
         # Save records to temp file for the app to load
         temp_records_path = str(Path(output_path).parent / ".temp_records.jsonl")
         save_jsonl(records, temp_records_path)
 
-        app_template = f'''
+        app_template = f"""
 import json
 import streamlit as st
 from pathlib import Path
@@ -195,24 +193,21 @@ with st.sidebar:
     if st.button("Go"):
         st.session_state.current_idx = jump_to - 1
         st.rerun()
-'''
+"""
         return app_template
 
 
 def annotate_dataset(
-    records: List[Dict[str, Any]],
-    task: str = "qa",
-    output_path: Optional[str] = None,
-    **kwargs
+    records: List[Dict[str, Any]], task: str = "qa", output_path: Optional[str] = None, **kwargs
 ) -> str:
     """Convenience function to launch annotation UI.
-    
+
     Args:
         records: Records to annotate
         task: Task type
         output_path: Output file path
         **kwargs: Additional arguments for Annotator.launch
-        
+
     Returns:
         Path to annotated records
     """

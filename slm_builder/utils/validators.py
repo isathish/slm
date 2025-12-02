@@ -12,23 +12,23 @@ logger = get_logger(__name__)
 
 # PII detection patterns (basic heuristics)
 PII_PATTERNS = {
-    "email": re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'),
-    "ssn": re.compile(r'\b\d{3}-\d{2}-\d{4}\b'),
-    "phone": re.compile(r'\b(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b'),
-    "credit_card": re.compile(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b'),
-    "ip_address": re.compile(r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'),
+    "email": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"),
+    "ssn": re.compile(r"\b\d{3}-\d{2}-\d{4}\b"),
+    "phone": re.compile(r"\b(\+\d{1,2}\s?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}\b"),
+    "credit_card": re.compile(r"\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b"),
+    "ip_address": re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b"),
 }
 
 
 def validate_file_exists(path: str) -> Path:
     """Validate that a file exists.
-    
+
     Args:
         path: File path to validate
-        
+
     Returns:
         Path object
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
     """
@@ -42,14 +42,14 @@ def validate_file_exists(path: str) -> Path:
 
 def validate_directory_exists(path: str, create: bool = False) -> Path:
     """Validate that a directory exists or create it.
-    
+
     Args:
         path: Directory path to validate
         create: Whether to create directory if it doesn't exist
-        
+
     Returns:
         Path object
-        
+
     Raises:
         FileNotFoundError: If directory doesn't exist and create=False
     """
@@ -67,11 +67,11 @@ def validate_directory_exists(path: str, create: bool = False) -> Path:
 
 def detect_pii(text: str, patterns: Optional[Dict[str, re.Pattern]] = None) -> List[Dict[str, Any]]:
     """Detect potential PII in text using regex patterns.
-    
+
     Args:
         text: Text to scan for PII
         patterns: Optional custom PII patterns (uses defaults if None)
-        
+
     Returns:
         List of detected PII instances with type and matched text
     """
@@ -82,26 +82,28 @@ def detect_pii(text: str, patterns: Optional[Dict[str, re.Pattern]] = None) -> L
     for pii_type, pattern in patterns.items():
         matches = pattern.finditer(text)
         for match in matches:
-            detections.append({
-                "type": pii_type,
-                "text": match.group(),
-                "start": match.start(),
-                "end": match.end(),
-            })
+            detections.append(
+                {
+                    "type": pii_type,
+                    "text": match.group(),
+                    "start": match.start(),
+                    "end": match.end(),
+                }
+            )
 
     return detections
 
 
 def scan_dataset_for_pii(records: List[Dict[str, Any]], allow_pii: bool = False) -> Dict[str, Any]:
     """Scan a dataset for PII and return report.
-    
+
     Args:
         records: List of dataset records
         allow_pii: If False, raise error if PII detected
-        
+
     Returns:
         Dictionary with PII scan results
-        
+
     Raises:
         ValueError: If PII detected and allow_pii=False
     """
@@ -115,9 +117,9 @@ def scan_dataset_for_pii(records: List[Dict[str, Any]], allow_pii: bool = False)
             detections = detect_pii(text)
             if detections:
                 records_with_pii += 1
-                pii_detections.extend([
-                    {**d, "record_index": i} for d in detections[:5]  # Limit samples
-                ])
+                pii_detections.extend(
+                    [{**d, "record_index": i} for d in detections[:5]]  # Limit samples
+                )
 
     report = {
         "total_records": total_records,
@@ -144,11 +146,11 @@ def scan_dataset_for_pii(records: List[Dict[str, Any]], allow_pii: bool = False)
 
 def validate_dataset_schema(records: List[Dict[str, Any]], required_fields: List[str]) -> None:
     """Validate that dataset records have required fields.
-    
+
     Args:
         records: List of dataset records
         required_fields: List of required field names
-        
+
     Raises:
         ValueError: If any record is missing required fields
     """
@@ -159,23 +161,23 @@ def validate_dataset_schema(records: List[Dict[str, Any]], required_fields: List
     for i, record in enumerate(records[:100]):  # Check first 100
         missing = [f for f in required_fields if f not in record]
         if missing:
-            missing_fields_samples.append({
-                "record_index": i,
-                "missing_fields": missing,
-            })
+            missing_fields_samples.append(
+                {
+                    "record_index": i,
+                    "missing_fields": missing,
+                }
+            )
 
     if missing_fields_samples:
-        raise ValueError(
-            f"Dataset records missing required fields: {missing_fields_samples[:5]}"
-        )
+        raise ValueError(f"Dataset records missing required fields: {missing_fields_samples[:5]}")
 
 
 def compute_data_hash(records: List[Dict[str, Any]]) -> str:
     """Compute a hash of the dataset for provenance tracking.
-    
+
     Args:
         records: List of dataset records
-        
+
     Returns:
         SHA256 hash of dataset
     """
@@ -188,12 +190,12 @@ def validate_column_mapping(
     columns: List[str], mapping: Dict[str, str], required_mappings: List[str]
 ) -> None:
     """Validate that column mapping contains required keys and valid columns.
-    
+
     Args:
         columns: Available column names
         mapping: Column name mapping
         required_mappings: Required mapping keys
-        
+
     Raises:
         ValueError: If mapping is invalid
     """
@@ -205,41 +207,39 @@ def validate_column_mapping(
     # Check mapped columns exist
     invalid = [v for v in mapping.values() if v not in columns]
     if invalid:
-        raise ValueError(
-            f"Mapped columns not found in data: {invalid}. Available: {columns}"
-        )
+        raise ValueError(f"Mapped columns not found in data: {invalid}. Available: {columns}")
 
 
 def sanitize_filename(filename: str) -> str:
     """Sanitize a filename by removing/replacing invalid characters.
-    
+
     Args:
         filename: Original filename
-        
+
     Returns:
         Sanitized filename
     """
     # Remove or replace invalid characters
-    sanitized = re.sub(r'[<>:"/\\|?*]', '_', filename)
-    sanitized = sanitized.strip('. ')
-    
+    sanitized = re.sub(r'[<>:"/\\|?*]', "_", filename)
+    sanitized = sanitized.strip(". ")
+
     # Limit length
     if len(sanitized) > 200:
-        name, ext = sanitized.rsplit('.', 1) if '.' in sanitized else (sanitized, '')
-        sanitized = name[:200-len(ext)-1] + (f'.{ext}' if ext else '')
-    
-    return sanitized or 'unnamed'
+        name, ext = sanitized.rsplit(".", 1) if "." in sanitized else (sanitized, "")
+        sanitized = name[: 200 - len(ext) - 1] + (f".{ext}" if ext else "")
+
+    return sanitized or "unnamed"
 
 
 def validate_model_name(model_name: str) -> str:
     """Validate and normalize model name.
-    
+
     Args:
         model_name: Model name or path
-        
+
     Returns:
         Validated model name
-        
+
     Raises:
         ValueError: If model name is invalid
     """
@@ -252,8 +252,8 @@ def validate_model_name(model_name: str) -> str:
 
     # Assume it's a HuggingFace model ID
     # Basic validation: should be org/model or just model
-    if '/' in model_name:
-        parts = model_name.split('/')
+    if "/" in model_name:
+        parts = model_name.split("/")
         if len(parts) != 2 or not all(parts):
             raise ValueError(f"Invalid model name format: {model_name}")
 

@@ -16,14 +16,14 @@ def export_to_onnx(
     quantize: bool = False,
 ) -> str:
     """Export model to ONNX format.
-    
+
     Args:
         model_dir: Directory with saved model
         output_path: Output ONNX file path
         opset_version: ONNX opset version
         optimize: Whether to optimize the model
         quantize: Whether to quantize the model
-        
+
     Returns:
         Path to exported ONNX model
     """
@@ -67,9 +67,10 @@ def export_to_onnx(
     except Exception as e:
         logger.error("ONNX export failed", error=str(e))
         logger.warning("Falling back to optimum for ONNX export")
-        
+
         try:
             from optimum.onnxruntime import ORTModelForCausalLM
+
             ort_model = ORTModelForCausalLM.from_pretrained(model_dir, export=True)
             ort_model.save_pretrained(output_path_obj.parent)
             logger.info("ONNX export via optimum successful")
@@ -91,11 +92,11 @@ def export_to_onnx(
 
 def quantize_onnx_model(onnx_path: str, output_path: Optional[str] = None) -> str:
     """Quantize ONNX model to int8.
-    
+
     Args:
         onnx_path: Path to ONNX model
         output_path: Optional output path (defaults to *_quantized.onnx)
-        
+
     Returns:
         Path to quantized model
     """
@@ -125,11 +126,11 @@ def export_to_torchscript(
     output_path: str,
 ) -> str:
     """Export model to TorchScript format.
-    
+
     Args:
         model_dir: Directory with saved model
         output_path: Output TorchScript file path
-        
+
     Returns:
         Path to exported TorchScript model
     """
@@ -157,7 +158,7 @@ def export_to_torchscript(
     # Save
     output_path_obj = Path(output_path)
     output_path_obj.parent.mkdir(parents=True, exist_ok=True)
-    
+
     traced_model.save(str(output_path))
 
     logger.info("TorchScript export successful", path=output_path)
@@ -173,7 +174,7 @@ def create_model_bundle(
     merge_lora: bool = True,
 ) -> str:
     """Create a complete model bundle for deployment.
-    
+
     Args:
         model_dir: Source model directory
         output_dir: Output bundle directory
@@ -181,7 +182,7 @@ def create_model_bundle(
         optimize_for: Optimization target (cpu, cuda)
         quantize: Whether to quantize
         merge_lora: Whether to merge LoRA adapters (if applicable)
-        
+
     Returns:
         Path to model bundle
     """
@@ -189,15 +190,13 @@ def create_model_bundle(
     output_path.mkdir(parents=True, exist_ok=True)
 
     logger.info(
-        "Creating model bundle",
-        format=format,
-        optimize_for=optimize_for,
-        quantize=quantize
+        "Creating model bundle", format=format, optimize_for=optimize_for, quantize=quantize
     )
 
     if format == "huggingface":
         # Simply copy the model directory
         import shutil
+
         shutil.copytree(model_dir, output_dir, dirs_exist_ok=True)
         logger.info("HuggingFace bundle created", path=output_dir)
         return output_dir

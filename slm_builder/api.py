@@ -42,7 +42,7 @@ class SLMBuilder:
         config: Optional[Dict[str, Any]] = None,
     ):
         """Initialize SLM Builder.
-        
+
         Args:
             project_name: Name of the project
             base_model: Base model name or path
@@ -66,7 +66,7 @@ class SLMBuilder:
         # Determine device
         if device is None or device == "auto":
             device = "cuda" if self.hw_profile["has_cuda"] else "cpu"
-        
+
         # Build configuration
         config_dict = {
             "project_name": project_name,
@@ -74,12 +74,12 @@ class SLMBuilder:
             "device": device,
             "work_dir": str(self.work_dir),
         }
-        
+
         if config:
             config_dict = merge_configs(config_dict, config)
 
         self.config = SLMConfig(**config_dict)
-        
+
         # Preprocessors
         self._preprocessors: List[Callable] = []
         self._postprocessors: List[Callable] = []
@@ -88,7 +88,7 @@ class SLMBuilder:
 
     def register_preprocessor(self, fn: Callable[[List[Dict]], List[Dict]]) -> None:
         """Register a custom preprocessor function.
-        
+
         Args:
             fn: Function that takes and returns list of records
         """
@@ -97,7 +97,7 @@ class SLMBuilder:
 
     def register_postprocessor(self, fn: Callable[[List[Dict]], List[Dict]]) -> None:
         """Register a custom postprocessor function.
-        
+
         Args:
             fn: Function that takes and returns list of records
         """
@@ -112,10 +112,10 @@ class SLMBuilder:
         output_dir: Optional[str] = None,
         annotation_opts: Optional[Dict] = None,
         overrides: Optional[Dict] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """Build SLM from CSV file.
-        
+
         Args:
             path: Path to CSV file
             task: Task type
@@ -124,13 +124,13 @@ class SLMBuilder:
             annotation_opts: Optional annotation options
             overrides: Configuration overrides
             **kwargs: Additional arguments for loader
-            
+
         Returns:
             Build results dictionary
         """
         self.config.task = task
         self.config.recipe = recipe
-        
+
         if overrides:
             # Apply recipe defaults first
             recipe_defaults = get_recipe_defaults(recipe)
@@ -144,7 +144,7 @@ class SLMBuilder:
             source_type="csv",
             output_dir=output_dir,
             annotation_opts=annotation_opts,
-            **kwargs
+            **kwargs,
         )
 
     def build_from_jsonl(
@@ -154,12 +154,12 @@ class SLMBuilder:
         recipe: str = "lora",
         output_dir: Optional[str] = None,
         overrides: Optional[Dict] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """Build SLM from JSONL file."""
         self.config.task = task
         self.config.recipe = recipe
-        
+
         if overrides:
             recipe_defaults = get_recipe_defaults(recipe)
             config_dict = merge_configs(self.config.model_dump(), recipe_defaults)
@@ -167,10 +167,7 @@ class SLMBuilder:
             self.config = SLMConfig(**config_dict)
 
         return self._build_from_source(
-            source=path,
-            source_type="jsonl",
-            output_dir=output_dir,
-            **kwargs
+            source=path, source_type="jsonl", output_dir=output_dir, **kwargs
         )
 
     def build_from_text_dir(
@@ -180,12 +177,12 @@ class SLMBuilder:
         recipe: str = "lora",
         output_dir: Optional[str] = None,
         overrides: Optional[Dict] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """Build SLM from directory of text files."""
         self.config.task = task
         self.config.recipe = recipe
-        
+
         if overrides:
             recipe_defaults = get_recipe_defaults(recipe)
             config_dict = merge_configs(self.config.model_dump(), recipe_defaults)
@@ -193,10 +190,7 @@ class SLMBuilder:
             self.config = SLMConfig(**config_dict)
 
         return self._build_from_source(
-            source=path,
-            source_type="text_dir",
-            output_dir=output_dir,
-            **kwargs
+            source=path, source_type="text_dir", output_dir=output_dir, **kwargs
         )
 
     def build_from_dataset(
@@ -208,20 +202,20 @@ class SLMBuilder:
         overrides: Optional[Dict] = None,
     ) -> Dict[str, Any]:
         """Build SLM from pre-loaded dataset.
-        
+
         Args:
             records: List of records in canonical format
             task: Task type
             recipe: Training recipe
             output_dir: Optional output directory
             overrides: Configuration overrides
-            
+
         Returns:
             Build results
         """
         self.config.task = task
         self.config.recipe = recipe
-        
+
         if overrides:
             recipe_defaults = get_recipe_defaults(recipe)
             config_dict = merge_configs(self.config.model_dump(), recipe_defaults)
@@ -236,7 +230,7 @@ class SLMBuilder:
         source_type: str,
         output_dir: Optional[str] = None,
         annotation_opts: Optional[Dict] = None,
-        **kwargs
+        **kwargs,
     ) -> Dict[str, Any]:
         """Internal method to build from a source."""
         logger.info("Loading dataset", source=source, type=source_type, task=self.config.task)
@@ -252,10 +246,11 @@ class SLMBuilder:
                 records,
                 task=self.config.task,
                 output_path=str(self.work_dir / "annotated.jsonl"),
-                **annotation_opts
+                **annotation_opts,
             )
             # Reload annotated data
             from slm_builder.utils.serialization import load_jsonl
+
             records = load_jsonl(annotated_path)
 
         return self._build_pipeline(records, output_dir=output_dir)
@@ -350,7 +345,7 @@ class SLMBuilder:
                 "raw_data": str(raw_data_path),
                 "processed_data": str(processed_data_path),
                 "metadata": str(output_path / "metadata.json"),
-            }
+            },
         }
 
         logger.info("Build complete", result=result)
@@ -364,13 +359,13 @@ class SLMBuilder:
         output_dir: Optional[str] = None,
     ) -> str:
         """Export trained model to specified format.
-        
+
         Args:
             model_dir: Directory with trained model
             format: Export format (onnx, torchscript, huggingface)
             optimize_for: Optimization target (cpu, cuda)
             output_dir: Optional output directory
-            
+
         Returns:
             Path to exported model
         """
@@ -393,13 +388,13 @@ class SLMBuilder:
 
     def serve(self, model_dir: str, host: str = "0.0.0.0", port: int = 8080) -> None:
         """Start serving the model via FastAPI.
-        
+
         Args:
             model_dir: Directory with model to serve
             host: Host address
             port: Port number
         """
         from slm_builder.serve.fastapi_server import start_server
-        
+
         logger.info("Starting server", host=host, port=port, model=model_dir)
         start_server(model_dir, host=host, port=port)

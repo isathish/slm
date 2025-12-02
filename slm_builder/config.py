@@ -87,7 +87,7 @@ class SLMConfig(BaseModel):
     recipe: str = Field(default="lora")
     device: Optional[str] = None
     work_dir: str = Field(default="./slm_workdir")
-    
+
     preprocess: PreprocessConfig = Field(default_factory=PreprocessConfig)
     training: TrainingConfig = Field(default_factory=TrainingConfig)
     lora: LoRAConfig = Field(default_factory=LoRAConfig)
@@ -96,7 +96,7 @@ class SLMConfig(BaseModel):
     # Security and governance
     allow_pii: bool = False
     check_license: bool = True
-    
+
     # Additional options
     use_auth_token: Optional[str] = None
     trust_remote_code: bool = False
@@ -145,10 +145,10 @@ DEFAULT_RECIPE_CONFIGS: Dict[str, Dict[str, Any]] = {
 
 def get_recipe_defaults(recipe: str) -> Dict[str, Any]:
     """Get default configuration overrides for a specific recipe.
-    
+
     Args:
         recipe: Recipe name (lora, finetune, etc.)
-        
+
     Returns:
         Dictionary with recipe-specific config overrides
     """
@@ -157,11 +157,11 @@ def get_recipe_defaults(recipe: str) -> Dict[str, Any]:
 
 def merge_configs(base: Dict[str, Any], overrides: Dict[str, Any]) -> Dict[str, Any]:
     """Deep merge configuration dictionaries.
-    
+
     Args:
         base: Base configuration dictionary
         overrides: Configuration overrides
-        
+
     Returns:
         Merged configuration dictionary
     """

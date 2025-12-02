@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 class DatasetRecord(BaseModel):
     """Canonical dataset record format.
-    
+
     This is the standard format used throughout the SLM Builder pipeline.
     All loaders must convert their data to this format.
     """
@@ -15,19 +15,16 @@ class DatasetRecord(BaseModel):
     id: str = Field(description="Unique record identifier")
     text: str = Field(description="Full text or prompt")
     metadata: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Source metadata (file, url, topic, etc.)"
+        default_factory=dict, description="Source metadata (file, url, topic, etc.)"
     )
     task: str = Field(default="qa", description="Task type")
     label: Optional[Dict[str, Any]] = Field(
-        default=None,
-        description="Task-specific label/annotation"
+        default=None, description="Task-specific label/annotation"
     )
     tokens: Optional[List[int]] = Field(
-        default=None,
-        description="Tokenized representation (populated during preprocessing)"
+        default=None, description="Tokenized representation (populated during preprocessing)"
     )
-    
+
     class Config:
         # Allow extra fields for extensibility
         extra = "allow"
@@ -35,7 +32,7 @@ class DatasetRecord(BaseModel):
 
 class QALabel(BaseModel):
     """Label schema for QA tasks."""
-    
+
     answer: str = Field(description="Answer text")
     question: Optional[str] = Field(default=None, description="Question text")
     start: Optional[int] = Field(default=None, description="Answer start position")
@@ -45,7 +42,7 @@ class QALabel(BaseModel):
 
 class ClassificationLabel(BaseModel):
     """Label schema for classification tasks."""
-    
+
     label: str = Field(description="Class label")
     confidence: Optional[float] = Field(default=None, ge=0, le=1)
     label_id: Optional[int] = Field(default=None)
@@ -53,14 +50,14 @@ class ClassificationLabel(BaseModel):
 
 class GenerationLabel(BaseModel):
     """Label schema for generation tasks."""
-    
+
     target: str = Field(description="Target generation text")
     prefix: Optional[str] = Field(default=None, description="Generation prefix/prompt")
 
 
 class InstructionLabel(BaseModel):
     """Label schema for instruction-tuning tasks."""
-    
+
     instruction: str = Field(description="Instruction/prompt")
     response: str = Field(description="Expected response")
     input: Optional[str] = Field(default=None, description="Optional input context")
@@ -78,21 +75,21 @@ TASK_LABEL_SCHEMAS = {
 
 def validate_record(record: Dict[str, Any], task: str) -> DatasetRecord:
     """Validate a record against canonical schema.
-    
+
     Args:
         record: Record dictionary
         task: Task type
-        
+
     Returns:
         Validated DatasetRecord
-        
+
     Raises:
         ValidationError: If record is invalid
     """
     # Ensure task is set
     if "task" not in record:
         record["task"] = task
-    
+
     # Validate label if present
     if record.get("label") and task in TASK_LABEL_SCHEMAS:
         label_schema = TASK_LABEL_SCHEMAS[task]
@@ -100,16 +97,16 @@ def validate_record(record: Dict[str, Any], task: str) -> DatasetRecord:
             record["label"] = label_schema(**record["label"]).model_dump()
         except Exception:
             pass  # Allow flexible labels
-    
+
     return DatasetRecord(**record)
 
 
 def record_to_dict(record: DatasetRecord) -> Dict[str, Any]:
     """Convert DatasetRecord to dictionary.
-    
+
     Args:
         record: DatasetRecord instance
-        
+
     Returns:
         Dictionary representation
     """
@@ -124,21 +121,21 @@ def create_qa_record(
     metadata: Optional[Dict[str, Any]] = None,
 ) -> DatasetRecord:
     """Helper to create a QA record.
-    
+
     Args:
         id: Record ID
         question: Question text
         answer: Answer text
         context: Optional context/passage
         metadata: Optional metadata
-        
+
     Returns:
         DatasetRecord for QA task
     """
     text = f"Question: {question}\nAnswer: {answer}"
     if context:
         text = f"Context: {context}\n{text}"
-    
+
     return DatasetRecord(
         id=id,
         text=text,
@@ -148,7 +145,7 @@ def create_qa_record(
             "question": question,
             "answer": answer,
             "context": context,
-        }
+        },
     )
 
 
@@ -161,7 +158,7 @@ def create_instruction_record(
     metadata: Optional[Dict[str, Any]] = None,
 ) -> DatasetRecord:
     """Helper to create an instruction-tuning record.
-    
+
     Args:
         id: Record ID
         instruction: Instruction/prompt
@@ -169,7 +166,7 @@ def create_instruction_record(
         input: Optional input context
         system: Optional system message
         metadata: Optional metadata
-        
+
     Returns:
         DatasetRecord for instruction task
     """
@@ -180,9 +177,9 @@ def create_instruction_record(
     if input:
         text_parts.append(f"Input: {input}")
     text_parts.append(f"Response: {response}")
-    
+
     text = "\n".join(text_parts)
-    
+
     return DatasetRecord(
         id=id,
         text=text,
@@ -193,7 +190,7 @@ def create_instruction_record(
             "response": response,
             "input": input,
             "system": system,
-        }
+        },
     )
 
 
@@ -206,7 +203,7 @@ def create_classification_record(
     metadata: Optional[Dict[str, Any]] = None,
 ) -> DatasetRecord:
     """Helper to create a classification record.
-    
+
     Args:
         id: Record ID
         text: Input text
@@ -214,7 +211,7 @@ def create_classification_record(
         label_id: Optional numeric label ID
         confidence: Optional confidence score
         metadata: Optional metadata
-        
+
     Returns:
         DatasetRecord for classification task
     """
@@ -227,5 +224,5 @@ def create_classification_record(
             "label": label,
             "label_id": label_id,
             "confidence": confidence,
-        }
+        },
     )

@@ -13,7 +13,7 @@ logger = get_logger(__name__)
 
 class PredictRequest(BaseModel):
     """Request model for prediction."""
-    
+
     prompt: str = Field(description="Input prompt")
     max_length: int = Field(default=100, ge=1, le=2048)
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
@@ -23,7 +23,7 @@ class PredictRequest(BaseModel):
 
 class PredictResponse(BaseModel):
     """Response model for prediction."""
-    
+
     generated_text: str
     prompt: str
     model: str
@@ -31,7 +31,7 @@ class PredictResponse(BaseModel):
 
 class BatchPredictRequest(BaseModel):
     """Request model for batch prediction."""
-    
+
     prompts: List[str] = Field(description="List of input prompts")
     max_length: int = Field(default=100, ge=1, le=2048)
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
@@ -40,13 +40,13 @@ class BatchPredictRequest(BaseModel):
 
 class BatchPredictResponse(BaseModel):
     """Response model for batch prediction."""
-    
+
     results: List[PredictResponse]
 
 
 class HealthResponse(BaseModel):
     """Health check response."""
-    
+
     status: str
     model_loaded: bool
     model_info: Dict[str, Any]
@@ -57,7 +57,7 @@ class SLMServer:
 
     def __init__(self, model_dir: str, device: str = "cpu"):
         """Initialize server.
-        
+
         Args:
             model_dir: Directory with trained model
             device: Device to run inference on
@@ -69,23 +69,21 @@ class SLMServer:
             description="API for serving Small/Specialized Language Models",
             version="0.1.0",
         )
-        
+
         # Load model
         logger.info("Loading model for serving", model_dir=model_dir, device=device)
-        self.model, self.tokenizer = ModelFactory.load_model_and_tokenizer(
-            model_dir, device=device
-        )
+        self.model, self.tokenizer = ModelFactory.load_model_and_tokenizer(model_dir, device=device)
         self.model.eval()
-        
+
         self.model_info = ModelFactory.get_model_info(self.model)
         logger.info("Model loaded", info=self.model_info)
-        
+
         # Register routes
         self._register_routes()
 
     def _register_routes(self):
         """Register API routes."""
-        
+
         @self.app.get("/health", response_model=HealthResponse)
         async def health():
             """Health check endpoint."""
@@ -100,7 +98,7 @@ class SLMServer:
             """Generate text from a prompt."""
             try:
                 logger.debug("Prediction request", prompt=request.prompt[:50])
-                
+
                 generated = generate_text(
                     model=self.model,
                     tokenizer=self.tokenizer,
@@ -110,7 +108,7 @@ class SLMServer:
                     top_p=request.top_p,
                     device=self.device,
                 )
-                
+
                 return PredictResponse(
                     generated_text=generated,
                     prompt=request.prompt,
@@ -135,12 +133,14 @@ class SLMServer:
                         top_p=request.top_p,
                         device=self.device,
                     )
-                    results.append(PredictResponse(
-                        generated_text=generated,
-                        prompt=prompt,
-                        model=self.model_dir,
-                    ))
-                
+                    results.append(
+                        PredictResponse(
+                            generated_text=generated,
+                            prompt=prompt,
+                            model=self.model_dir,
+                        )
+                    )
+
                 return BatchPredictResponse(results=results)
             except Exception as e:
                 logger.error("Batch prediction failed", error=str(e))
@@ -150,7 +150,7 @@ class SLMServer:
         async def metrics():
             """Get server metrics."""
             import psutil
-            
+
             return {
                 "cpu_percent": psutil.cpu_percent(),
                 "memory_percent": psutil.virtual_memory().percent,
@@ -166,7 +166,7 @@ def start_server(
     reload: bool = False,
 ):
     """Start the FastAPI server.
-    
+
     Args:
         model_dir: Directory with trained model
         host: Host address
@@ -175,11 +175,11 @@ def start_server(
         reload: Enable auto-reload (development)
     """
     import uvicorn
-    
+
     server = SLMServer(model_dir=model_dir, device=device)
-    
+
     logger.info("Starting server", host=host, port=port)
-    
+
     uvicorn.run(
         server.app,
         host=host,
@@ -190,13 +190,13 @@ def start_server(
 
 if __name__ == "__main__":
     import sys
-    
+
     if len(sys.argv) < 2:
         print("Usage: python fastapi_server.py <model_dir> [host] [port]")
         sys.exit(1)
-    
+
     model_dir = sys.argv[1]
     host = sys.argv[2] if len(sys.argv) > 2 else "0.0.0.0"
     port = int(sys.argv[3]) if len(sys.argv) > 3 else 8080
-    
+
     start_server(model_dir, host, port)

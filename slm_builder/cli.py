@@ -21,7 +21,9 @@ def cli():
 
 @cli.command()
 @click.option("--source", required=True, help="Path to data source (CSV, JSONL, directory)")
-@click.option("--task", default="qa", help="Task type (qa, classification, generation, instruction)")
+@click.option(
+    "--task", default="qa", help="Task type (qa, classification, generation, instruction)"
+)
 @click.option("--recipe", default="lora", help="Training recipe (lora, finetune, instruction-tune)")
 @click.option("--base-model", default="gpt2", help="Base model name or path")
 @click.option("--out", "--output", "output_dir", help="Output directory")
@@ -64,7 +66,7 @@ def build(
 
     # Determine source type and build
     source_path = Path(source)
-    
+
     try:
         if source.endswith(".csv"):
             result = builder.build_from_csv(
@@ -94,7 +96,7 @@ def build(
         click.echo("\n✅ Build complete!")
         click.echo(f"   Model directory: {result['model_dir']}")
         click.echo(f"   Output directory: {result['output_dir']}")
-        
+
     except Exception as e:
         click.echo(f"\n❌ Build failed: {str(e)}", err=True)
         sys.exit(1)
@@ -103,7 +105,9 @@ def build(
 @cli.command()
 @click.option("--source", required=True, help="Path to data source")
 @click.option("--task", default="qa", help="Task type")
-@click.option("--out", "--output", "output_path", default="annotated.jsonl", help="Output JSONL file")
+@click.option(
+    "--out", "--output", "output_path", default="annotated.jsonl", help="Output JSONL file"
+)
 @click.option("--port", default=8501, help="Streamlit server port")
 def annotate(source: str, task: str, output_path: str, port: int):
     """Launch annotation UI for labeling data."""
@@ -114,11 +118,11 @@ def annotate(source: str, task: str, output_path: str, port: int):
 
     # Load data
     from slm_builder.data import load_dataset
-    
+
     try:
         records = load_dataset(source, task=task)
         click.echo(f"   Loaded {len(records)} records")
-        
+
         annotate_dataset(
             records=records,
             task=task,
@@ -160,7 +164,7 @@ def export(model_dir: str, format: str, optimize: str, output_dir: Optional[str]
 
         click.echo(f"\n✅ Export complete!")
         click.echo(f"   Exported to: {exported_path}")
-        
+
     except Exception as e:
         click.echo(f"❌ Export failed: {str(e)}", err=True)
         sys.exit(1)
@@ -180,8 +184,9 @@ def serve(model_dir: str, host: str, port: int):
     try:
         # Import and start server
         from slm_builder.serve.fastapi_server import start_server
+
         start_server(model_dir, host=host, port=port)
-        
+
     except KeyboardInterrupt:
         click.echo("\n👋 Server stopped")
     except Exception as e:
@@ -194,9 +199,9 @@ def serve(model_dir: str, host: str, port: int):
 def info(source: str):
     """Display information about a dataset or model."""
     click.echo(f"ℹ️  Information for: {source}")
-    
+
     source_path = Path(source)
-    
+
     if source_path.is_file():
         # Dataset info
         if source.endswith(".jsonl") or source.endswith(".json"):
@@ -209,7 +214,7 @@ def info(source: str):
                 click.echo(f"   Tasks: {tasks}")
         else:
             click.echo(f"   File size: {source_path.stat().st_size / 1024:.2f} KB")
-    
+
     elif source_path.is_dir():
         # Check if it's a model directory
         if (source_path / "config.json").exists():

@@ -18,10 +18,10 @@ class ModelFactory:
         use_auth_token: Optional[str] = None,
         trust_remote_code: bool = False,
         load_in_8bit: bool = False,
-        **kwargs
+        **kwargs,
     ) -> Tuple[Any, Any]:
         """Load model and tokenizer from HuggingFace or local path.
-        
+
         Args:
             model_name: Model name or path
             device: Device to load on
@@ -29,7 +29,7 @@ class ModelFactory:
             trust_remote_code: Whether to trust remote code
             load_in_8bit: Load model in 8-bit (requires bitsandbytes)
             **kwargs: Additional model loading arguments
-            
+
         Returns:
             Tuple of (model, tokenizer)
         """
@@ -58,7 +58,7 @@ class ModelFactory:
         model_kwargs = {
             "use_auth_token": use_auth_token,
             "trust_remote_code": trust_remote_code,
-            **kwargs
+            **kwargs,
         }
 
         if load_in_8bit:
@@ -81,14 +81,9 @@ class ModelFactory:
         return model, tokenizer
 
     @staticmethod
-    def save_model_and_tokenizer(
-        model: Any,
-        tokenizer: Any,
-        output_dir: str,
-        **kwargs
-    ) -> None:
+    def save_model_and_tokenizer(model: Any, tokenizer: Any, output_dir: str, **kwargs) -> None:
         """Save model and tokenizer to directory.
-        
+
         Args:
             model: Model to save
             tokenizer: Tokenizer to save
@@ -116,10 +111,10 @@ class ModelFactory:
     @staticmethod
     def get_model_info(model: Any) -> Dict[str, Any]:
         """Get information about a model.
-        
+
         Args:
             model: Model instance
-            
+
         Returns:
             Dictionary with model information
         """
@@ -132,12 +127,14 @@ class ModelFactory:
         # Add config info if available
         if hasattr(model, "config"):
             config = model.config
-            info.update({
-                "vocab_size": getattr(config, "vocab_size", None),
-                "hidden_size": getattr(config, "hidden_size", None),
-                "num_layers": getattr(config, "num_hidden_layers", None),
-                "num_attention_heads": getattr(config, "num_attention_heads", None),
-            })
+            info.update(
+                {
+                    "vocab_size": getattr(config, "vocab_size", None),
+                    "hidden_size": getattr(config, "hidden_size", None),
+                    "num_layers": getattr(config, "num_hidden_layers", None),
+                    "num_attention_heads": getattr(config, "num_attention_heads", None),
+                }
+            )
 
         return info
 
@@ -150,10 +147,10 @@ def generate_text(
     temperature: float = 0.7,
     top_p: float = 0.9,
     device: str = "cpu",
-    **kwargs
+    **kwargs,
 ) -> str:
     """Generate text from a prompt.
-    
+
     Args:
         model: Model instance
         tokenizer: Tokenizer instance
@@ -163,7 +160,7 @@ def generate_text(
         top_p: Top-p sampling parameter
         device: Device
         **kwargs: Additional generation arguments
-        
+
     Returns:
         Generated text
     """
@@ -183,7 +180,7 @@ def generate_text(
             top_p=top_p,
             do_sample=True,
             pad_token_id=tokenizer.pad_token_id,
-            **kwargs
+            **kwargs,
         )
 
     # Decode
@@ -191,6 +188,6 @@ def generate_text(
 
     # Remove prompt from output
     if generated.startswith(prompt):
-        generated = generated[len(prompt):].strip()
+        generated = generated[len(prompt) :].strip()
 
     return generated
