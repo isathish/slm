@@ -1,0 +1,6 @@
+question,answer,context
+What is machine learning?,Machine learning is a subset of AI that enables systems to learn from data.,Machine learning focuses on developing algorithms that can learn patterns from data.
+What is deep learning?,Deep learning is a subset of machine learning using neural networks with multiple layers.,Deep learning has revolutionized AI with breakthroughs in computer vision and NLP.
+What is natural language processing?,NLP is a field of AI focused on interaction between computers and human language.,NLP enables computers to understand and generate human language.
+What is computer vision?,Computer vision enables computers to interpret and understand visual information from the world.,Computer vision is used in applications like facial recognition and autonomous vehicles.
+What is reinforcement learning?,Reinforcement learning is a type of ML where agents learn by interacting with an environment.,Reinforcement learning has been successful in game playing and robotics.
