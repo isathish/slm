@@ -28,8 +28,8 @@ def export_to_onnx(
         Path to exported ONNX model
     """
     try:
-        from transformers import AutoModelForCausalLM, AutoTokenizer
         import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
     except ImportError:
         raise ImportError("transformers and torch required for ONNX export")
 
@@ -101,7 +101,7 @@ def quantize_onnx_model(onnx_path: str, output_path: Optional[str] = None) -> st
         Path to quantized model
     """
     try:
-        from onnxruntime.quantization import quantize_dynamic, QuantType
+        from onnxruntime.quantization import QuantType, quantize_dynamic
     except ImportError:
         raise ImportError("onnxruntime required for quantization")
 
@@ -135,8 +135,8 @@ def export_to_torchscript(
         Path to exported TorchScript model
     """
     try:
-        from transformers import AutoModelForCausalLM, AutoTokenizer
         import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer
     except ImportError:
         raise ImportError("transformers and torch required for TorchScript export")
 

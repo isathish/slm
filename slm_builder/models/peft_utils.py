@@ -20,7 +20,8 @@ def apply_lora(model: Any, lora_config: LoRAConfig, **kwargs) -> Any:
         Model with LoRA adapters applied
     """
     try:
-        from peft import LoraConfig as PeftLoraConfig, get_peft_model
+        from peft import LoraConfig as PeftLoraConfig
+        from peft import get_peft_model
     except ImportError:
         raise ImportError("peft not installed. Install with: pip install slm-builder[full]")
 
